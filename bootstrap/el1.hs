@@ -31,26 +31,39 @@ cptToAst (List x) = case tab of
 
 
 
--- evalAST
-
-
 addFunction :: [Ast] -> Ast
 addFunction [] = error "Empty list"
 addFunction (Call x : xs) = addFunction ((evalAST (Call x)) : xs)
+addFunction (Symb x : xs) = error "Not a number"
+addFunction (Define x y : xs) = error "Not a number"
 addFunction list = Value (sum [x | Value x <- list])
 
+minusFunction :: [Ast] -> Ast
+minusFunction [] = error "Empty list"
+minusFunction (Call x : xs) = minusFunction ((evalAST (Call x)) : xs)
+minusFunction (Symb x : xs) = error "Not a number"
+minusFunction (Define x y : xs) = error "Not a number"
+minusFunction list = Value (foldl1 (-) [x | Value x <- list])
 
 mulFunction :: [Ast] -> Ast
 mulFunction [] = error "Empty list"
 mulFunction (Call x : xs) = mulFunction ((evalAST (Call x)) : xs)
+mulFunction (Symb x : xs) = error "Not a number"
+mulFunction (Define x y : xs) = error "Not a number"
 mulFunction list = Value (product [x | Value x <- list])
 
+divFunction :: [Ast] -> Ast
+divFunction [] = error "Empty list"
+divFunction (Call x : xs) = divFunction ((evalAST (Call x)) : xs)
+divFunction (Symb x : xs) = error "Not a number"
+divFunction (Define x y : xs) = error "Not a number"
+divFunction list = Value (foldl1 div [x | Value x <- list])
 
 evalAST :: Ast -> Ast
 evalAST (Value x) = (Value x)
--- evalAST (Call (Symb "+" : x)) = Just (addFunction (x))
--- evalAST (Call (Symb "*" : x)) = Just (mulFunction (x))
 evalAST (Call (Symb x : xs)) = case x of
     "+" -> (addFunction xs)
+    "-" -> (minusFunction xs)
     "*" -> (mulFunction xs)
+    "/" -> (divFunction xs)
     otherwise -> error "Unknown function"
