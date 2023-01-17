@@ -1,4 +1,5 @@
-import Part1
+import CPT
+import AST
 
 import Data.Char(digitToInt) -- very important
 
@@ -63,4 +64,6 @@ main = do
         _ -> do
             let cpt = List (parseCpt line)
             print (printTree cpt)
+             
+            print (cptToAST cpt)
     print line
