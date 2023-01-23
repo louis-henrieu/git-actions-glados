@@ -35,3 +35,12 @@ parseMany p s = case p s of
     Just (as, s'') -> Just (a:as, s'')
     Nothing -> Just ([a], s')
   Nothing -> Just ([], s)
+
+parseSome :: Parser a -> Parser [a]
+parseSome p s = case p s of
+  (Just (a, s')) -> case parseMany p s' of
+    (Just (as, s'')) -> Just (a:as, s'')
+    Nothing -> Nothing
+  Nothing -> Nothing
+
+-- STEP 4
