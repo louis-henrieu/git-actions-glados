@@ -71,4 +71,6 @@ module AST where
         "-" -> (minusFunction xs)
         "*" -> (mulFunction xs)
         "/" -> (divFunction xs)
-        otherwise -> error "Unknown function"
+        _ -> error "Unknown function"
+    evalAst (Call (Call x : xs)) = evalAST (Call (evalAST (Call x) : xs))
+    evalAst _ = error "Not a number"

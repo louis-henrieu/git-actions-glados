@@ -3,15 +3,28 @@ import AST
 
 import Data.Char(digitToInt) -- very important
 
-isDigit :: Char -> Bool -- check if a char is a number 
+isDigit :: Char -> Bool -- check if a char is a number
 isDigit c = c >= '0' && c <= '9'
 
-isNumber :: String -> Bool -- check if a word is a number
-isNumber (c:s) = case (isDigit c, s) of
+-- isNumber :: String -> Bool -- check if a word is a number
+-- isNumber (c:s) = case (isDigit c, s) of
+--     (True, []) -> True
+--     (False, _) -> False
+--     (True, s) -> isNumber s
+-- isNumber [] = False
+
+isNumber :: String -> Bool -> Bool -- check if a word is a number (the number can be negative)
+isNumber' (c:cs) True = case (isDigit c, cs) of
     (True, []) -> True
     (False, _) -> False
-    (True, s) -> isNumber s
-isNumber [] = False
+    (True, cs) -> isNumber' cs True
+isNumber' (c:cs) False = case c of
+    '-' -> isNumber' cs True
+    _ -> case (isDigit c, cs) of
+        (True, []) -> True
+        (False, _) -> False
+        (True, cs) -> isNumber' cs False
+isNumber' [] _ = False
 
 concatIntArr :: [Int] -> Int -- correctly concatenates int numbers together
 concatIntArr li = case li of
@@ -23,7 +36,7 @@ stringToInt :: String -> Int -- convert String to int
 stringToInt s = concatIntArr (map digitToInt s)
 
 parseType :: String -> Cpt -- attribute CPT type to each string
-parseType (x) = if (isNumber x) then (Number (stringToInt x)) else (Symbol x)
+parseType (x) = if (isNumber x False) then (Number (read x)) else (Symbol x)
 
 parseWord :: String -> String -- from a string return the first word
 parseWord [] = []
@@ -62,8 +75,6 @@ main = do
     case line of
         "quit" -> return ()
         _ -> do
-            let cpt = List (parseCpt line)
-            print (printTree cpt)
-             
-            print (cptToAST cpt)
-    print line
+            let env = []
+            let (tab_ast:tab_ast') = listCptToListAST (parseCpt line)
+            print (evalAST tab_ast)
