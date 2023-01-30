@@ -1,5 +1,6 @@
 #environment
 .vscode/
+glads/
 *~
 
 # stack
@@ -8,6 +9,8 @@ dist/
 .stack-work/
 CHANGELOG.md
 README.md
+LICENSE
+stack.yaml.lock
 
 # makefile
 OLD*
@@ -16,3 +19,4 @@ coverage/
 # project
 *.hi
 *.o
+glados
