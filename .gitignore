@@ -1,2 +1,16 @@
-*.hi
-*.o
+#environment
+.vscode/
+*~
+
+# stack
+dist-newstyle/
+dist/
+.stack-work/
+CHANGELOG.md
+README.md
+
+# makefile
+OLD*
+coverage/
+
+# project
