@@ -2,30 +2,32 @@ data Parser a = Parser {
   runParser :: String -> Either String (a, String)
 }
 
-class Functor f => Applicative f where
-  pure :: a -> f a
-  (<*>) :: f (a -> b) -> f a -> f b
+instance Functor Parser where
+  fmap fct parser = Parser (\s -> case runParser parser s of
+    Right (a, s') -> Right (fct a, s')
+    Left(x) -> Left(x))
+
+instance Functor Parser => Applicative Parser where
+  pure :: a -> Parser a
+
+  (<*>) :: Parser (a -> b) -> Parser a -> Parser b
   pf <*> pa = Parser (\s -> case runParser pf s of
     Left err -> Left err
-    Right (f,rs) -> case runParser pa rs of
+    Right (f ,rs) -> case runParser pa rs of
       Left err -> Left err
-      Right (a,rs2) -> Right (f a, rs2))
+      Right (a,rs2) -> Right (Parser a, rs2))
   
-class Functor f2 => Alternative f2 where
-  pure2 :: a -> f2 a
-  (<|>) :: f2 a -> f2 a -> f2 a
-  pf <|> pa = Parser (\s -> case runParser pf s of
-    Left err -> case runParser pa s of
-      Right (a, rs) -> Right (a, rs)
-      Left err -> (\s -> case (runParser pa s) of
-        Left err2 -> Left (err ++ "\n" ++ err2)
-        Right (a, rs) -> Right (a, rs))
-    Right (f, rs) -> Right (f, rs))
+-- class Functor f2 => Alternative f2 where
+--   pure :: a -> f2 a
+--   (<|>) :: f2 a -> f2 a -> f2 a
+--   pf <|> pa = Parser (\s -> case runParser pf s of
+--     Left err -> case runParser pa s of
+--       Right (a, rs) -> Right (a, rs)
+--       Left err -> (case (runParser pa s) of
+--         Left err2 -> Left (err ++ "\n" ++ err2)
+--         Right (a, rs) -> Right (a, rs))
+--     Right (f, rs) -> Right (f, rs))
 
-instance Functor Parser where
-  fmap f p = Parser (\s -> case runParser p s of
-    Right (a, s') -> Right (f a, s')
-    Left(x) -> Left(x))
 
 parseChar :: Char -> Parser Char
 parseChar c = Parser (\s -> case s of
