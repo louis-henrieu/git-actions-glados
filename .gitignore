@@ -1,2 +1,22 @@
+#environment
+.vscode/
+glads/
+*~
+
+# stack
+dist-newstyle/
+dist/
+.stack-work/
+CHANGELOG.md
+README.md
+LICENSE
+stack.yaml.lock
+
+# makefile
+OLD*
+coverage/
+
+# project
 *.hi
 *.o
+glados
