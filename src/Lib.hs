@@ -8,6 +8,7 @@ module Lib
     ) where
 
 import Temp
+import AST
 
 
 next :: Int -> Int
@@ -22,4 +23,12 @@ getSh x = print (nexti x)
 
 
 someFunc :: IO ()
-someFunc = getSh 'c'
+someFunc = putStrLn "someFunc"
+
+getEnv :: k -> [(v, k)] -> Maybe v
+getEnv _ [] = Nothing
+getEnv k [(value, key):(vs, ks)] =
+    | k == key = Just(value)
+    | otherwise = getEnv k (vs, ks)
+
+ eval :: IO()

@@ -43,7 +43,8 @@ printTree (Node s) = "a List with" ++ unwords (map printTree s)
 printTree (Symbole s) = "a Symbol " ++ s
 printTree (Num s) = "a Number " ++ show s
 
-data Ast = Define String Cpt
+data Ast = Define String (Maybe Ast)
+        | Lambda [Maybe Ast] String
         | Var Int
         | Call [Maybe Ast]
         | SymboleElse String
