@@ -27,6 +27,10 @@ library
   exposed-modules:
       Lib
       Temp
+      Ast
+      Cpt
+      ParseCpt
+      Env
   other-modules:
       Paths_glados
   hs-source-dirs:

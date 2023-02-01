@@ -1,16 +1,16 @@
-module ENV where
-    import CPT
+module Env where
+    import Info
     import Data.Map
     import Prelude hiding (lookup)
     import Data.Typeable
+    import Info
 
-    data Ast = Define String (Ast)
-        | IntegerAst Int
-        | SymbolAst String
-        | Call [Ast]
-        deriving Show
-
-    type Env = Map String (Ast)
+    --data Ast = Define String (Ast)
+    --    | IntegerAst Int
+    --    | SymbolAst String
+    --    | Call [Ast]
+    --    -- | Builtin [Ast] -> Env -> Either String Ast
+    --    deriving Show
 
     envStorage :: Env
     envStorage = fromList []
@@ -27,12 +27,16 @@ module ENV where
         t -> print t
         where t = toList env
     
-    main :: IO ()
-    main = do
-        let env = updateEnv "x" ((IntegerAst 4)) envStorage
-        let env2 = updateEnv "y" ((IntegerAst 5)) env
-        print env
-        print env2
+    --initEnvMap :: EnvMap
+    --initEnvMap = fromList [("+", (\args env -> Right sum args))]
+
+    
+    --main :: IO ()
+    --main = do
+    --    let env = updateEnv "x" ((IntegerAst 4)) envStorage
+    --    let env2 = updateEnv "y" ((IntegerAst 5)) env
+    --    print env
+    --    print env2
         -- putStrLn $ show (typeOf env)
         --print the type of env
         -- printAllEnv env

@@ -50,20 +50,20 @@ data Ast = Define String (Maybe Ast)
         | SymboleElse String
         deriving Show
 
-cptToAST :: Cpt -> Maybe Ast
--- cptToAST (Node [Symbole s, Symbole x, Num y]) = case s of
+cptToAst :: Cpt -> Maybe Ast
+-- cptToAst (Node [Symbole s, Symbole x, Num y]) = case s of
 --         "define" -> Just (Define x (Num y))
 --         _ -> Just (SymboleElse s)
--- cptToAST (Node s) = Just (Call (map cptToAST s))
+-- cptToAst (Node s) = Just (Call (map cptToAst s))
 
-cptToAST (Num s) = Just (Var s)
-cptToAST (Node []) = Nothing
-cptToAST (Node s) = case s of
+cptToAst (Num s) = Just (Var s)
+cptToAst (Node []) = Nothing
+cptToAst (Node s) = case s of
         [] -> Just (Call [])
-        (Symbole "define"):(Symbole x):(Num y):s -> Just (Call ((Just (Define x (Num y))):(map cptToAST s ))) --Just (Call ((Just (Define x (Num y))):(map cptToAST s)))
-        x:s -> (cptToAST (Node s)) --Just (Call ((cptToAST x) :(map cptToAST s)))
-cptToAST (Symbole s) = Nothing
-cptToAST (Symbole s) = case s of
+        (Symbole "define"):(Symbole x):(Num y):s -> Just (Call ((Just (Define x (Num y))):(map cptToAst s ))) --Just (Call ((Just (Define x (Num y))):(map cptToAst s)))
+        x:s -> (cptToAst (Node s)) --Just (Call ((cptToAst x) :(map cptToAst s)))
+cptToAst (Symbole s) = Nothing
+cptToAst (Symbole s) = case s of
         "define" -> 
 
--- Just ( Call ( ( Just ( Define x ( Num y ) ) ) : ( cptToAST ( Node s ) ) ) )
+-- Just ( Call ( ( Just ( Define x ( Num y ) ) ) : ( cptToAst ( Node s ) ) ) )
