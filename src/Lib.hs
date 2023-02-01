@@ -22,12 +22,11 @@ next i = i + 1
 getSh :: Char -> IO ()
 getSh x = print (nexti x)
 
-someFunc :: IO ()
+
+someFunc :: Env -> IO ()
 someFunc = do
     line <- getLine
-    case line of
-        "quit" -> return ()
-        _ -> do
+    if line == "quit" then return() else do
             let cpts = parseCpt line
             let cpt_ast = cptToAST (head cpts)
             case cpt_ast of
@@ -38,6 +37,8 @@ someFunc = do
                             (IntegerAst i) -> print i
                             _ -> print result
                         Left err -> print err
+                Nothing -> print "The AST isn't valid"
+            someFunc
                 -- -- Just ast -> print ast
                 -- Just ast -> case evalAST ast of
                 --     Right result -> print result

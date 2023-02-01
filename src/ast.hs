@@ -4,6 +4,7 @@ module AST where
     data Ast = Define String (Maybe Ast)
         | IntegerAst Int
         | SymbolAst String
+        | Function [Ast] -> Either String Ast
         | Call [Ast]
         deriving Show
 
@@ -101,20 +102,19 @@ module AST where
     defineValue (Define x y) l = (x, y) : l
     defineValue _ l = l
 
-    evalAST :: Ast -> Either String Ast
+    evalAST :: Ast -> Either String (Ast, Env)
     evalAST (IntegerAst x) = Right (IntegerAst x)
     evalAST (SymbolAst x) = Left("Need : " ++ x ++ " is a symbol to find")
     evalAST (Call (SymbolAst x : xs)) = case x of
         "+" -> Right (addFunction xs)
-        -- "-" -> (minusFunction xs)
-        -- "*" -> (mulFunction xs)
+        "-" -> Right(minusFunction xs)
+        "*" -> Right(mulFunction xs)
         "/" -> Right (divFunction xs)
         "%" -> Right (modFunction xs)
         _ -> Left ("Error : " ++ x ++ " is not a function")
     evalAST _ = Left("Error : Not a function")
 
 
-    -- evalAst (Call (Call x : xs)) = evalAst (Call (evalAst (Call x) : xs))
     -- evalAst (Define x y) = Left("Need : Define")
     -- evalAst (SymbolAst x) = Left("Need :" ++ x ++ "Symbol to find")
     -- evalAst (Call []) = Left("Error : empty call")

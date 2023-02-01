@@ -4,13 +4,13 @@ module ENV where
     import Prelude hiding (lookup)
     import Data.Typeable
 
-    data Ast = Define String (Maybe Ast)
+    data Ast = Define String (Ast)
         | IntegerAst Int
         | SymbolAst String
         | Call [Ast]
         deriving Show
 
-    type Env = Map String (Maybe Ast)
+    type Env = Map String (Ast)
 
     envStorage :: Env
     envStorage = fromList []
@@ -19,7 +19,7 @@ module ENV where
     --printEnv env = do
     --    print env
 
-    updateEnv :: String -> Maybe Ast -> Env -> Env
+    updateEnv :: String -> Ast -> Env -> Env
     updateEnv key value env = insert key value env
 
     printAllEnv :: Env -> IO ()
@@ -29,9 +29,11 @@ module ENV where
     
     main :: IO ()
     main = do
-        let env = updateEnv "x" (Just (IntegerAst 4)) envStorage
-        env <- updateEnv "y" (Just (IntegerAst 5)) envStorage
-        putStrLn $ show (typeOf env)
+        let env = updateEnv "x" ((IntegerAst 4)) envStorage
+        let env2 = updateEnv "y" ((IntegerAst 5)) env
+        print env
+        print env2
+        -- putStrLn $ show (typeOf env)
         --print the type of env
         -- printAllEnv env
         --print env storage
