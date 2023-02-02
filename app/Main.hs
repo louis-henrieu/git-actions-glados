@@ -4,4 +4,4 @@ import Lib
 import Env
 
 main :: IO ()
-main = someFunc (initEnv envStorage)
+main = someFunc envStorage

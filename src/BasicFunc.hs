@@ -102,18 +102,18 @@ module BasicFunc (
 
     check_zero :: Ast -> Env -> Either String Ast
     check_zero (IntegerAst i) env = case i of
-        0 -> Left "Divide by zero"
+        0 -> Left "Second argument is null"
         _ -> Right (IntegerAst i)
     check_zero (FloatAst f) env = case f of
-        0 -> Left "Divide by zero"
+        0 -> Left "Second argument is null"
         _ -> Right (FloatAst f)
     check_zero (SymbolAst s) env = case getValueEnv env s of
         Right ast -> case ast of
             (IntegerAst i) -> case i of
-                0 -> Left "Divide by zero"
+                0 -> Left "Second argument is null"
                 _ -> Right (IntegerAst i)
             (FloatAst f) -> case f of
-                0 -> Left "Divide by zero"
+                0 -> Left "Second argument is null"
                 _ -> Right (FloatAst f)
             _ -> Left "The symbol \'s\' isn't valid"
         Left err -> Left err
@@ -150,7 +150,9 @@ module BasicFunc (
     pre_mod [] env = Left "Mod function needs at least two arguments"
     pre_mod (x:y:xs) env = case length (x:y:xs) of
         2 -> case check_only_int (x:y:xs) env of
-            True -> Right (modulo x y env)
+            True -> case check_zero y env of
+                Right res -> Right (modulo x y env)
+                Left err -> Left err
             False -> Left "Mod function only works with integers"
         _ -> Left "Mod function only needs two arguments"
 

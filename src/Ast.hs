@@ -53,10 +53,8 @@ module Ast where
     cptToAst :: Cpt -> Either String Ast
     cptToAst (Number i) = Right (IntegerAst i)
     cptToAst (Symbol s) = Right (SymbolAst s)
-    cptToAst (List (Symbol "lambda" : cpt1 : cpt2 : [])) = case cptToAst cpt1 of
-        Right ast1 -> case cptToAst cpt2 of
-            Right ast2 -> Right (Lambda ast1 ast2)
-            Left err -> Left err
+    cptToAst (List (Symbol "lambda" : List l : cpt : [])) = case cptToAst cpt of
+        Right ast -> Right (Lambda (map (\(Symbol s) -> s) l) ast)
         Left err -> Left err
     cptToAst (List (Symbol "lambda" : _)) = Left "Invalid lambda"
     cptToAst (List (Symbol "if" : cpt1 : cpt2 : cpt3 : [])) = case cptToAst cpt1 of

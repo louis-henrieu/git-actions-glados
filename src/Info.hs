@@ -10,7 +10,7 @@ module Info where
         | FloatAst Float
         | SymbolAst String
         -- | Function [Ast] -> Either String Ast
-        | Lambda Ast Ast
+        | Lambda [String] Ast
         | If Ast Ast Ast
         | Builtin ([Ast] -> Env -> Either String Ast)
         | Call [Ast]
