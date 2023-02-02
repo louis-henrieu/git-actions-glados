@@ -10,7 +10,6 @@ module Lib
 import Temp
 import Cpt
 import Ast
-import ParseCpt
 import Env
 import Info
 
@@ -24,21 +23,26 @@ next i = i + 1
 getSh :: Char -> IO ()
 getSh x = print (nexti x)
 
+printAst :: Ast -> IO ()
+printAst ast = case ast of
+    (IntegerAst i) -> print i
+    (SymbolAst s) -> print s
+    (FloatAst f) -> print f
+    (Lambda ast1 ast2) -> print "#<procedure>"
+    -- (CallAst l) -> print l
+    -- (DefineAst s ast) -> print (s, ast)
+    _ -> print "The Ast isn't valid"
 
 someFunc :: Env -> IO ()
-someFunc = do
+someFunc env = do
     line <- getLine
     if line == "quit" then return() else do
-            let cpts = parseCpt line
-            let cpt_ast = cptToAst (head cpts)
-            print (show cpt_ast)
-            -- case cpt_ast of
-            --     Just ast -> case ast of
-            --         (IntegerAst i) -> print i
-            --         _ -> case evalAst ast of
-            --             Right result -> case result of
-            --                 (IntegerAst i) -> print i
-            --                 _ -> print result
-            --             Left err -> print err
-            --     Nothing -> print "The Ast isn't valid"
-            someFunc
+        let ast = FloatAst 42.0
+        case preEvalAst ast (updateEnv "foo" (IntegerAst 42) env) of
+            Right ast2 -> case evalAst ast2 (updateEnv "foo" (IntegerAst 42) env) of
+                Right result -> case (fst result) of
+                    Empty -> printAllEnv (snd result)
+                    _ -> printAst (fst result)
+                Left err -> print err
+            Left err -> print err
+        someFunc envStorage
