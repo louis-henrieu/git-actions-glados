@@ -1,6 +1,6 @@
 module BasicFunc (
-    add,
-    sub,
+    pre_add,
+    pre_sub,
     mul,
     division,
     modulo,
@@ -9,8 +9,36 @@ module BasicFunc (
 
     import Info
 
-    add :: Float -> Float -> Ast
-    add x y = (FloatAst(x + y))
+    check_float_int :: [Ast] -> Env -> Either String Bool
+    check_float_int [] env = Right True
+    check_float_int (x:xs) env = case x of
+        (IntegerAst i) -> check_float_int xs env
+        (FloatAst f) -> check_float_int xs env
+        (SymbolAst s) -> case getValueEnv env s of
+            Right ast -> case ast of
+                (IntegerAst i) -> check_float_int xs env
+                (FloatAst f) -> check_float_int xs env
+                _ -> Left "The symbol \'s\' isn't valid"
+            Left err -> Left err
+        _ -> Left "The arg \'x\' is not a number"
+    
+    pre_add :: [Ast] -> Env -> Either String Ast
+    pre_add [] env = Left "Add function needs at least two arguments"
+    pre_add args env = case check_float_int args env of
+        Right x -> add args env
+        Left err -> Left err
+
+    add :: [Ast] -> Env -> Either String Ast
+    add [] env = Right (IntegerAst 0)
+    add (x:xs) env = case x of
+        (IntegerAst i) -> Right (IntegerAst (i + (sum [x | IntegerAst x <- xs])))
+        (FloatAst f) -> Right (FloatAst (f + (sum [x | FloatAst x <- xs])))
+        (SymbolAst s) -> case getValueEnv env s of
+            Right ast -> case ast of
+                (IntegerAst i) -> Right (IntegerAst (i + (sum [x | IntegerAst x <- xs])))
+                (FloatAst f) -> Right (FloatAst (f + (sum [x | FloatAst x <- xs])))
+                _ -> Left "The symbol \'s\' isn't valid"
+            Left err -> Left err
 
     --add [] = error "Empty list"
     -- add (Call x : xs) = add ((evalAst (Call x)) : xs)
@@ -18,8 +46,20 @@ module BasicFunc (
     --add (Define x y : xs) = error "Not a number"
     --add list = IntegerAst (sum [x |  IntegerAst x <- list])
 
-    sub :: Float -> Float -> Ast
-    sub x y = (FloatAst(x - y))
+
+    pre_sub :: [Ast] -> Env -> Either String Ast
+    pre_sub [] env = Left "Sub function needs at least two arguments"
+    pre_sub args env = case check_float_int args env of
+        Right x -> sub args env
+        Left err -> Left err
+
+    sub :: [Ast] -> Env -> Either String Ast
+    sub [] env = Right (IntegerAst 0)
+    sub (x:xs) env = case x of
+        (IntegerAst i) -> Right (IntegerAst (i - (sum [x | IntegerAst x <- xs])))
+        (FloatAst f) -> Right (FloatAst (f - (sum [x | FloatAst x <- xs])))
+        _ -> Left "Not a number"
+
 
     --sub :: [Ast] -> Ast
     --sub [] = error "Empty list"
