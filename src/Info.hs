@@ -20,3 +20,10 @@ module Info where
 
     --type Env =  String (Ast)
     type Env =  [(String ,Ast)]
+
+    --getValueEnv :: String -> Env -> Either String Ast
+    getValueEnv :: Env -> String -> Either String Ast
+    getValueEnv [] key = Left ("Symbole : \'" ++ key ++ "\' not found")
+    getValueEnv env key = if key == fst (head env)
+        then Right (snd (head env))
+        else getValueEnv (tail env) key

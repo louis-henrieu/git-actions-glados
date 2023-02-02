@@ -75,12 +75,6 @@ module Ast where
         t -> cptToAst t
         where t = List (Symbol "call" : l)
 
-    getValueEnv :: Env -> String -> Either String Ast
-    getValueEnv [] key = Left ("Variable " ++ key ++ " not found")
-    getValueEnv env key = if key == fst (head env)
-        then Right (snd (head env))
-        else getValueEnv (tail env) key
-
     -- defineValue :: Ast -> Env -> Env
     -- defineValue (Define x y) env = (x, y) : env
     -- defineValue _ env = env
@@ -92,6 +86,7 @@ module Ast where
     preEvalAst (SymbolAst x) env = case getValueEnv env x of
         Right ast -> Right ast
         Left err -> Left err
+    preEvalAst (Call c) env = Right (Call c)
     preEvalAst _ env = Left "Not implemented"
     -- preEvalAst (IntegerAst i) env = Right (IntegerAst i)
     -- preEvalAst (SymbolAst x) env = Right (SymbolAst x)
@@ -107,12 +102,20 @@ module Ast where
     evalAst (Define d x) env = Right (Empty, updateEnv d x env)
     evalAst (IntegerAst i) env = Right (IntegerAst i, env)
     evalAst (FloatAst f) env = Right (FloatAst f, env)
-    evalAst (Lambda lx ly) env = Left("Need : Lambda")
-    evalAst (If ix iy iz) env = Left("Need : If")
-    -- evalAst (BuiltIn b) env = Left("Need : BuiltIn")
-    evalAst (Call (SymbolAst f : xs)) env = case getValueEnv env f of
-        Right x -> Right(Empty, env)
+    evalAst (Call(SymbolAst x:xs)) env = case getValueEnv env x of
         Left err -> Left err
+        Right res -> case res of
+            Builtin f -> case f xs env of
+                Left err -> Left err
+                Right ast -> Right (ast, env)
+            _ -> Left (x ++ " is not a function")
+
+    -- evalAst (Lambda lx ly) env = Left("Need : Lambda")
+    -- evalAst (If ix iy iz) env = Left("Need : If")
+    -- evalAst (BuiltIn b) env = Left("Need : BuiltIn")
+    -- evalAst (Call (SymbolAst f : xs)) env = case getValueEnv env f of
+    --     Right x -> Right(Empty, env)
+    --     Left err -> Left err
 
 
 
