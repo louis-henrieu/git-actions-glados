@@ -59,14 +59,39 @@ testAdd2 :: Env -> IO ()
 testAdd2 env = do
     evalAll [Define "foo" (IntegerAst 42), Call [SymbolAst "+", SymbolAst "foo", IntegerAst 42]] env
 
+testSub :: Env -> IO ()
+testSub env = do
+    let test = Call [SymbolAst "-", IntegerAst 0, IntegerAst 42]
+    case preEvalAst test env of
+        Right ast -> case evalAst ast env of
+            Right result -> case (fst result) of
+                Empty -> print "ok"
+                _ -> printAst (fst result)
+            Left err -> print (err)
+        Left err -> print (err)
+
+testSub2 :: Env -> IO ()
+testSub2 env = do
+    evalAll [Define "foo" (IntegerAst 42), Call [SymbolAst "-", SymbolAst "foo", IntegerAst 42]] env
+
 someFunc :: Env -> IO ()
 someFunc env = do
     -- Test scope :
     -- evalAll [Define "foo" (IntegerAst 42), SymbolAst "baz"] env
 
     -- test builtIn with add :
-    -- testAdd env
+    print ("test add :")
+    print "----------------"
+    testAdd env
+    print "----------------"
     testAdd2 env
+
+    -- test builtIn with sub :
+    print ("test sub :")
+    print "----------------"
+    testSub env
+    print "----------------"
+    testSub2 env
 
     -- Test autre :
     -- line <- getLine

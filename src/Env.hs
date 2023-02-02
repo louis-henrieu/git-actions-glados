@@ -1,7 +1,6 @@
 module Env where
     import Info
     import BasicFunc
-    import Data.Map
     import Prelude hiding (lookup)
     import Data.Typeable
     import Info
@@ -31,9 +30,12 @@ module Env where
 
     initEnv :: Env -> Env
     initEnv env = do
-        let env = updateEnv "+" (Builtin pre_add) env
-        let env = updateEnv "-" (Builtin pre_sub) env
-        env
+        let env2 = updateEnv "+" (Builtin pre_add) env
+        let env3 = updateEnv "-" (Builtin pre_sub) env2
+        let env4 = updateEnv "*" (Builtin pre_mul) env3
+        let env5 = updateEnv "/" (Builtin pre_div) env4
+        let env6 = updateEnv "mod" (Builtin pre_mod) env5
+        env6
     --initEnvMap :: EnvMap
     --initEnvMap = fromList [("+", (\args env -> Right sum args))]
 

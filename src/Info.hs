@@ -1,5 +1,4 @@
 module Info where
-    import Data.Map
     import Prelude hiding (lookup)
     import Data.Typeable
     import Data.Data
