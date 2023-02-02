@@ -15,6 +15,8 @@ module Info where
         | If Ast Ast Ast
         | Builtin ([Ast] -> Env -> Either String Ast)
         | Call [Ast]
+        | Empty
         deriving Show
 
-    type Env = Map String (Ast)
+    --type Env =  String (Ast)
+    type Env =  [(String ,Ast)]
