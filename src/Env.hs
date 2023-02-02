@@ -13,20 +13,21 @@ module Env where
     --    deriving Show
 
     envStorage :: Env
-    envStorage = fromList []
+    envStorage = []
 
     --printEnv :: Env -> IO ()
     --printEnv env = do
     --    print env
 
     updateEnv :: String -> Ast -> Env -> Env
-    updateEnv key value env = insert key value env
+    updateEnv symbol ast env = (symbol, ast) : env
 
     printAllEnv :: Env -> IO ()
-    printAllEnv env = case t of
-        t -> print t
-        where t = toList env
-    
+    printAllEnv [] = return ()
+    printAllEnv ((symbol, ast):xs) = do
+        print (symbol, ast)
+        printAllEnv xs
+
     --initEnvMap :: EnvMap
     --initEnvMap = fromList [("+", (\args env -> Right sum args))]
 
