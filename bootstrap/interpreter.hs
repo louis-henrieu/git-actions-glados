@@ -13,7 +13,7 @@ isDigit c = c >= '0' && c <= '9'
 --     (True, s) -> isNumber s
 -- isNumber [] = False
 
-isNumber :: String -> Bool -> Bool -- check if a word is a number (the number can be negative)
+isNumber' :: String -> Bool -> Bool -- check if a word is a number (the number can be negative)
 isNumber' (c:cs) True = case (isDigit c, cs) of
     (True, []) -> True
     (False, _) -> False
@@ -36,7 +36,7 @@ stringToInt :: String -> Int -- convert String to int
 stringToInt s = concatIntArr (map digitToInt s)
 
 parseType :: String -> Cpt -- attribute CPT type to each string
-parseType (x) = if (isNumber x False) then (Number (read x)) else (Symbol x)
+parseType (x) = if (isNumber' x False) then (Number (read x)) else (Symbol x)
 
 parseWord :: String -> String -- from a string return the first word
 parseWord [] = []
