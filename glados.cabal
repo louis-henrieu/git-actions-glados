@@ -29,6 +29,7 @@ library
       Cpt
       Env
       Info
+      Keywords
       Lib
       Temp
   other-modules:
