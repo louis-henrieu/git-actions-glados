@@ -6,6 +6,7 @@ module Env (
     import Info
     import BasicFunc
     import Prelude hiding (lookup)
+    import Keywords
 
     envStorage :: Env
     envStorage = [
@@ -13,7 +14,8 @@ module Env (
         ("-", (Builtin pre_sub)),
         ("*", (Builtin pre_mul)),
         ("/", (Builtin pre_div)),
-        ("mod", (Builtin pre_mod))
+        ("mod", (Builtin pre_mod)),
+        ("eq?", (Builtin preEqFunc))
         ]
 
     updateEnv :: String -> Ast -> Env -> Env
