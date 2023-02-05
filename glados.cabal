@@ -32,6 +32,7 @@ library
       Keywords
       Lib
       Temp
+      Define
   other-modules:
       Paths_glados
   hs-source-dirs:
