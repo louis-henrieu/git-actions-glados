@@ -12,6 +12,7 @@ import Cpt
 import Ast
 import Env
 import Info
+import Keywords
 
 next :: Int -> Int
 next i = i + 1
@@ -25,8 +26,8 @@ getSh x = print (nexti x)
 
 printAst :: Ast -> IO ()
 printAst ast = case ast of
-    (IntegerAst i) -> print i
-    (SymbolAst s) -> print s
+    (IntegerAst i) -> putStrLn (show i)
+    (SymbolAst s) -> putStrLn s
     (FloatAst f) -> print f
     (Lambda ast1 ast2) -> print "#<procedure>"
     -- (CallAst l) -> print l
@@ -54,7 +55,6 @@ evalFunc ast env = do
                 _ -> printAst (fst result)
             Left err -> putStrLn("Error : " ++ err)
         Left err -> putStrLn("Error : " ++ err)
-evalFunc _ _ = putStrLn "The Ast isn't valid"
 
 someFunc :: Env -> IO ()
 someFunc env = do
@@ -97,6 +97,19 @@ someFunc env = do
     putStrLn "\n\ntest modulo 16 5 :\nShould return 1"
     evalFunc (Call [SymbolAst "mod", IntegerAst 16, IntegerAst 5]) env
 
+    putStrLn "\n\ntest ConvertArgs :\n-------------\n"
+    putStrLn (show (convertArgs [SymbolAst "foo", IntegerAst 42] [("foo", IntegerAst 42)]))
+
+    putStrLn "\n\ntest eq :\n-------------\n"
+    putStrLn "test eq 42 42 :\nShould return #t"
+    evalFunc (Call [SymbolAst "eq?", IntegerAst 42, IntegerAst 42]) env
+
+    putStrLn "\n\ntest eq 42 0 :\nShould return #f"
+    evalFunc (Call [SymbolAst "eq?", IntegerAst 42, IntegerAst 0]) env
+
+    putStrLn "\n\ntest if :\n-------------\n"
+    putStrLn "test if (eq? 42 42) 42 0 :\nShould return 42"
+    evalFunc (Call [SymbolAst "if", Call [SymbolAst "eq?", IntegerAst 42, IntegerAst 42], IntegerAst 42, IntegerAst 0]) env
     -- Test autre :
     -- line <- getLine
     -- if line == "quit" then return() else do

@@ -97,9 +97,21 @@ module Ast where
     --     Left err -> Left error "Error : " ++ err
 
     evalAst :: Ast -> Env -> Either String (Ast, Env)
+    evalAst (SymbolAst x) env = Right (SymbolAst x, env)
     evalAst (Define d x) env = Right (Empty, updateEnv d x env)
     evalAst (IntegerAst i) env = Right (IntegerAst i, env)
     evalAst (FloatAst f) env = Right (FloatAst f, env)
+    evalAst (Call(SymbolAst "if":x:y:z:xs)) env = case length (y:z:xs) of
+        2 -> case evalAst x env of
+            Right (SymbolAst "#t", _) -> case preEvalAst y env of
+                Right ast -> evalAst ast env
+                Left err -> Left err
+            Right (SymbolAst "#f", _) -> case preEvalAst z env of
+                Right ast -> evalAst ast env
+                Left err -> Left err
+            Right _ -> Left "If condition must be a boolean"
+            Left err -> Left err
+        _ -> Left ("There is " ++ show (length xs) ++ "arguments after the if condition")
     evalAst (Call(SymbolAst x:xs)) env = case getValueEnv env x of
         Left err -> Left err
         Right res -> case res of
@@ -107,7 +119,6 @@ module Ast where
                 Left err -> Left err
                 Right ast -> Right (ast, env)
             _ -> Left (x ++ " is not a function")
-
     -- evalAst (Lambda lx ly) env = Left("Need : Lambda")
     -- evalAst (If ix iy iz) env = Left("Need : If")
     -- evalAst (BuiltIn b) env = Left("Need : BuiltIn")

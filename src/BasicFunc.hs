@@ -4,7 +4,6 @@ module BasicFunc (
     pre_mul,
     pre_div,
     pre_mod,
-    fact
 ) where
 
     import Info
@@ -14,31 +13,22 @@ module BasicFunc (
     check_float_int (x:xs) env = case x of
         (IntegerAst i) -> check_float_int xs env
         (FloatAst f) -> check_float_int xs env
-        (SymbolAst s) -> case getValueEnv env s of
-            Right ast -> case ast of
-                (IntegerAst i) -> check_float_int xs env
-                (FloatAst f) -> check_float_int xs env
-                _ -> Left "The symbol \'s\' isn't valid"
-            Left err -> Left err
         _ -> Left "The arg \'x\' is not a number"
     
     pre_add :: [Ast] -> Env -> Either String Ast
     pre_add [] env = Left "Add function needs at least two arguments"
-    pre_add args env = case check_float_int args env of
-        Right x -> add args env
-        Left err -> Left err
+    pre_add args env = case checkIfEmpty (convertArgs args env) of
+        True -> case check_float_int (convertArgs args env) env of
+            Right True -> add (convertArgs args env) env
+            Left err -> Left err
+        False -> Left "There is at least a symbol that doesn't exist"
 
     add :: [Ast] -> Env -> Either String Ast
     add [] env = Right (IntegerAst 0)
     add (x:xs) env = case x of
         (IntegerAst i) -> Right (IntegerAst (i + (sum [x | IntegerAst x <- xs])))
         (FloatAst f) -> Right (FloatAst (f + (sum [x | FloatAst x <- xs])))
-        (SymbolAst s) -> case getValueEnv env s of
-            Right ast -> case ast of
-                (IntegerAst i) -> Right (IntegerAst (i + (sum [x | IntegerAst x <- xs])))
-                (FloatAst f) -> Right (FloatAst (f + (sum [x | FloatAst x <- xs])))
-                _ -> Left "The symbol \'s\' isn't valid"
-            Left err -> Left err
+        _ -> Left "Not a number"
 
     --add [] = error "Empty list"
     -- add (Call x : xs) = add ((evalAst (Call x)) : xs)
@@ -49,25 +39,20 @@ module BasicFunc (
 
     pre_sub :: [Ast] -> Env -> Either String Ast
     pre_sub [] env = Left "Sub function needs at least two arguments"
-    pre_sub args env = case check_float_int args env of
-        Right x -> sub args env
-        Left err -> Left err
+    pre_sub args env = case checkIfEmpty (convertArgs args env) of
+        True -> case check_float_int (convertArgs args env) env of
+            Right True -> sub (convertArgs args env) env
+            Left err -> Left err
+        False -> Left "There is at least a symbol that doesn't exist"
 
     sub :: [Ast] -> Env -> Either String Ast
     sub [] env = Right (IntegerAst 0)
     sub (x:xs) env = case x of
         (IntegerAst i) -> Right (IntegerAst (i - (sum [x | IntegerAst x <- xs])))
         (FloatAst f) -> Right (FloatAst (f - (sum [x | FloatAst x <- xs])))
-        (SymbolAst s) -> case getValueEnv env s of
-            Right ast -> case ast of
-                (IntegerAst i) -> Right (IntegerAst (i - (sum [x | IntegerAst x <- xs])))
-                (FloatAst f) -> Right (FloatAst (f - (sum [x | FloatAst x <- xs])))
-                _ -> Left "The symbol \'s\' isn't valid"
-            Left err -> Left err
         _ -> Left "Not a number"
 
-
-    --sub :: [Ast] -> Ast
+    --sub ::[Ast] -> Ast
     --sub [] = error "Empty list"
     -- sub (Call x : xs) = sub ((evalAst (Call x)) : xs)
     --sub (SymbolAst x : xs) = error "Not a number"
@@ -76,21 +61,18 @@ module BasicFunc (
 
     pre_mul :: [Ast] -> Env -> Either String Ast
     pre_mul [] env = Left "Mul function needs at least two arguments"
-    pre_mul args env = case check_float_int args env of
-        Right x -> mul args env
-        Left err -> Left err
+    pre_mul args env = case checkIfEmpty (convertArgs args env) of
+        True -> case check_float_int (convertArgs args env) env of
+            Right True -> mul (convertArgs args env) env
+            Left err -> Left err
+        False -> Left "There is at least a symbol that doesn't exist"
 
     mul :: [Ast] -> Env -> Either String Ast
     mul [] env = Right (IntegerAst 1)
     mul (x:xs) env = case x of
         (IntegerAst i) -> Right (IntegerAst (i * (product [x | IntegerAst x <- xs])))
         (FloatAst f) -> Right (FloatAst (f * (product [x | FloatAst x <- xs])))
-        (SymbolAst l) -> case getValueEnv env l of
-            Right ast -> case ast of
-                (IntegerAst i) -> Right (IntegerAst (i * (product [x | IntegerAst x <- xs])))
-                (FloatAst f) -> Right (FloatAst (f * (product [x | FloatAst x <- xs])))
-                _ -> Left "The symbol \'l\' isn't valid"
-            Left err -> Left err
+        _ -> Left "Not a number"
 
     --mul :: [Ast] -> Ast
     --mul [] = error "Empty list"
@@ -122,12 +104,14 @@ module BasicFunc (
     pre_div :: [Ast] -> Env -> Either String Ast
     pre_div [] env = Left "Div function needs at least two arguments"
     -- no more than two arguments
-    pre_div (x:y:xs) env = case length xs of
-        0 -> case check_float_int [x,y] env of
-            Right res -> case check_zero y env of
-                Right res -> division (x:y:xs) env
+    pre_div (x:y:xs) env = case length (x:y:xs) of
+        2 -> case checkIfEmpty (convertArgs (x:y:xs) env) of
+            True -> case check_float_int (convertArgs (x:y:xs) env) env of
+                Right True -> case check_zero (y) env of
+                    Right ast -> (division (convertArgs [x, y] env) (env))
+                    Left err -> Left err
                 Left err -> Left err
-            Left err -> Left err
+            False -> Left "There is at least a symbol that doesn't exist"
         _ -> Left "Div function only needs two arguments"
 
     division :: [Ast] -> Env -> Either String Ast
@@ -149,35 +133,18 @@ module BasicFunc (
     pre_mod :: [Ast] -> Env -> Either String Ast
     pre_mod [] env = Left "Mod function needs at least two arguments"
     pre_mod (x:y:xs) env = case length (x:y:xs) of
-        2 -> case check_only_int (x:y:xs) env of
-            True -> case check_zero y env of
-                Right res -> Right (modulo x y env)
-                Left err -> Left err
-            False -> Left "Mod function only works with integers"
+        2 -> case checkIfEmpty (convertArgs (x:y:xs) env) of
+            True -> case check_only_int (convertArgs (x:y:xs) env) env of
+                True -> case check_zero (y) env of
+                    Right ast -> modulo (convertArgs (x:y:xs) env) env
+                    Left err -> Left err
+                False -> Left "Mod function only works with integers"
+            False -> Left "There is at least a symbol that doesn't exist"
         _ -> Left "Mod function only needs two arguments"
 
-    modulo :: Ast -> Ast -> Env -> Ast
-    modulo (IntegerAst x) (IntegerAst y) env = IntegerAst (x `mod` y)
-    modulo (IntegerAst x) (SymbolAst y) env = case getValueEnv env y of
-        Right ast -> case ast of
-            (IntegerAst i) -> IntegerAst (x `mod` i)
-            _ -> error "Not a number"
-        Left err -> error err
-    modulo (SymbolAst x) (IntegerAst y) env = case getValueEnv env x of
-        Right ast -> case ast of
-            (IntegerAst i) -> IntegerAst (i `mod` y)
-            _ -> error "Not a number"
-        Left err -> error err
-    modulo (SymbolAst x) (SymbolAst y) env = case getValueEnv env x of
-        Right ast -> case ast of
-            (IntegerAst i) -> case getValueEnv env y of
-                Right ast -> case ast of
-                    (IntegerAst j) -> IntegerAst (i `mod` j)
-                    _ -> error "Not a number"
-                Left err -> error err
-            _ -> error "Not a number"
-        Left err -> error err
-    modulo _ _ _ = error "Not a number"
+    modulo :: [Ast] -> Env -> Either String Ast
+    modulo (IntegerAst x: IntegerAst y: xs) env = Right (IntegerAst (x `mod` y))
+    modulo _ _ = Left "Not a number"
 
     fact :: Int -> Ast
     fact x = IntegerAst (product [1..x])
