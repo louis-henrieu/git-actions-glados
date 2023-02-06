@@ -4,28 +4,39 @@ module Ast where
     import Env
     import Define
 
-    cptToAst :: Cpt -> Either String Ast
-    cptToAst (Number i) = Right (IntegerAst i)
-    cptToAst (Symbol s) = Right (SymbolAst s)
-    cptToAst (List (Symbol "lambda" : List l : cpt : [])) = case cptToAst cpt of
-        Right ast -> Right (Lambda (map (\(Symbol s) -> s) l) ast)
-        Left err -> Left err
-    cptToAst (List (Symbol "lambda" : _)) = Left "Invalid lambda"
-    cptToAst (List (Symbol "if" : cpt1 : cpt2 : cpt3 : [])) = case cptToAst cpt1 of
-        Right ast1 -> case cptToAst cpt2 of
-            Right ast2 -> case cptToAst cpt3 of
-                Right ast3 -> Right (If ast1 ast2 ast3)
+    -- cptToAst :: Cpt -> Either String Ast
+    -- cptToAst (Number i) = Right (IntegerAst i)
+    -- cptToAst (Symbol s) = Right (SymbolAst s)
+    -- cptToAst (List (Symbol "lambda" : List l : cpt : [])) = case cptToAst cpt of
+    --     Right ast -> Right (Lambda (map (\(Symbol s) -> s) l) ast)
+    --     Left err -> Left err
+    -- cptToAst (List (Symbol "lambda" : _)) = Left "Invalid lambda"
+    -- cptToAst (List (Symbol "if" : cpt1 : cpt2 : cpt3 : [])) = case cptToAst cpt1 of
+    --     Right ast1 -> case cptToAst cpt2 of
+    --         Right ast2 -> case cptToAst cpt3 of
+    --             Right ast3 -> Right (If ast1 ast2 ast3)
+    --             Left err -> Left err
+    --         Left err -> Left err
+    --     Left err -> Left err
+    -- cptToAst (List (Symbol "if" : _)) = Left "Invalid if"
+    -- cptToAst (List (Symbol "define" : Symbol s : cpt : [])) = case cptToAst cpt of
+    --     Right ast -> Right (Define s ast)
+    --     Left err -> Left err
+    -- cptToAst (List (Symbol "define" : _)) = Left "Invalid define"
+    -- cptToAst (List l) = case t of
+    --     t -> cptToAst t
+    --     where t = List (Symbol "call" : l)
+
+    lambdaFunc :: [String] -> Ast -> [Ast] -> Env -> Either String (Ast, Env)
+    lambdaFunc _ _ _ [] = Left "Lambda function needs at least one argument"
+    lambdaFunc syms ast args env = if ((length syms) == (length args))
+        then do
+            let env2 = updateAllEnv syms args env
+            case evalAst ast env2 of
+                Right (ast, env3) -> Right (ast, env)
                 Left err -> Left err
-            Left err -> Left err
-        Left err -> Left err
-    cptToAst (List (Symbol "if" : _)) = Left "Invalid if"
-    cptToAst (List (Symbol "define" : Symbol s : cpt : [])) = case cptToAst cpt of
-        Right ast -> Right (Define s ast)
-        Left err -> Left err
-    cptToAst (List (Symbol "define" : _)) = Left "Invalid define"
-    cptToAst (List l) = case t of
-        t -> cptToAst t
-        where t = List (Symbol "call" : l)
+        else
+            Left "Invalid number of arguments"
 
     preEvalAst :: Ast -> Env -> Either String Ast
     preEvalAst (Define x y) env = Right (Define x y)
@@ -35,6 +46,7 @@ module Ast where
         Right ast -> Right ast
         Left err -> Left err
     preEvalAst (Call c) env = Right (Call c)
+    preEvalAst (Lambda x y) env = Right (Lambda x y)
     preEvalAst _ env = Left "Not implemented"
 
     evalAst :: Ast -> Env -> Either String (Ast, Env)
@@ -60,6 +72,8 @@ module Ast where
                 Left err -> Left err
                 Right ast -> Right (ast, env)
             _ -> Left (x ++ " is not a function")
+    evalAst (Lambda x y) env = Right(SymbolAst "#<procedure>", env)
+    evalAst (Call((Lambda x y):z)) env = lambdaFunc x y z env
     -- evalAst (Lambda lx ly) env = Left("Need : Lambda")
     -- evalAst (If ix iy iz) env = Left("Need : If")
     -- evalAst (BuiltIn b) env = Left("Need : BuiltIn")

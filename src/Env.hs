@@ -2,7 +2,8 @@ module Env (
     envStorage,
     updateEnv,
     printAllEnv,
-    replaceEnv
+    replaceEnv,
+    updateAllEnv
 ) where
     import Info
     import BasicFunc
@@ -30,10 +31,12 @@ module Env (
         else
             replaceEnv symbol ast xs
 
+    updateAllEnv :: [String] -> [Ast] -> Env -> Env
+    updateAllEnv [] [] env = env
+    updateAllEnv (s:symbols) (a:asts) env = updateAllEnv symbols asts (updateEnv s a env)
+
     printAllEnv :: Env -> IO ()
     printAllEnv [] = return ()
     printAllEnv ((symbol, ast):xs) = do
         print (symbol, ast)
         printAllEnv xs
-
-        

@@ -27,12 +27,12 @@ library
       Ast
       BasicFunc
       Cpt
+      Define
       Env
       Info
       Keywords
       Lib
       Temp
-      Define
   other-modules:
       Paths_glados
   hs-source-dirs:
