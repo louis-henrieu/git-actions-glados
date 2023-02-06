@@ -1,4 +1,5 @@
 module BasicFunc (
+    check_float_int,
     pre_add,
     pre_sub,
     pre_mul,
