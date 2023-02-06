@@ -1,4 +1,6 @@
 module Parser where
+  import Control.Applicative
+
   data Cpt = Num Int | Node [Cpt] | Symbole String deriving Show
 
   data Parser a = Parser {
@@ -10,27 +12,21 @@ module Parser where
       Right (a, s') -> Right (fct a, s')
       Left(x) -> Left(x))
 
-  -- instance Functor Parser => Applicative Parser where
-  --   pure :: a -> Parser a
-
-  --   (<*>) :: Parser (a -> b) -> Parser a -> Parser b
-  --   pf <*> pa = Parser (\s -> case runParser pf s of
-  --     Left err -> Left err
-  --     Right (f ,rs) -> case runParser pa rs of
-  --       Left err -> Left err
-  --       Right (a,rs2) -> Right (Parser a, rs2))
+  instance Applicative Parser where
+    pure e = Parser (\s -> Right (e, s))
+    pf <*> pa = Parser (\s -> case runParser pf s of
+      Left err -> Left err
+      Right (f ,rs) -> case runParser pa rs of
+        Left err -> Left err
+        Right (a,rs2) -> Right (f a, rs2))
     
-  -- class Functor f2 => Alternative f2 where
-  --   pure :: a -> f2 a
-  --   (<|>) :: f2 a -> f2 a -> f2 a
-  --   pf <|> pa = Parser (\s -> case runParser pf s of
-  --     Left err -> case runParser pa s of
-  --       Right (a, rs) -> Right (a, rs)
-  --       Left err -> (case (runParser pa s) of
-  --         Left err2 -> Left (err ++ "\n" ++ err2)
-  --         Right (a, rs) -> Right (a, rs))
-  --     Right (f, rs) -> Right (f, rs))
-
+  instance Alternative Parser where
+    empty = Parser (\s -> Left ("Error empty"))
+    pf <|> pa = Parser (\s -> case runParser pf s of
+      Left err -> case runParser pa s of
+        Right res2 -> Right res2
+        Left err2 -> Left (err ++ "\n" ++ err2)
+      Right res1 -> Right res1)
 
   parseChar :: Char -> Parser Char
   parseChar c = Parser (\s -> case s of
@@ -42,7 +38,6 @@ module Parser where
   parseAnyChar (x:xs) = Parser (\s -> case runParser (parseChar x) s of
     Right (c, s') -> Right (c, s')
     Left(x) -> runParser (parseAnyChar xs) s)
-
 
   parseOr :: Parser a -> Parser a -> Parser a
   parseOr p1 p2 = Parser (\s -> case runParser p1 s of
@@ -83,7 +78,6 @@ module Parser where
   parseUInt = Parser (\s -> case runParser (parseSome (parseAnyChar ['0'..'9'])) s of
     Right (cs, s') -> Right (read cs, s')
     Left(x) -> Left("Error ParseUInt"))
-
 
   parseInt :: Parser Int
   parseInt = Parser (\s -> case runParser (parseChar '-') s of
@@ -130,7 +124,7 @@ module Parser where
         Right (c', s''') -> Right (map fst as, s''')
         Left(x) -> case isClosingParenthesis s'' of
           True -> case runParser p (beforeClosingParenthesis s'' "") of
-            Right(a, s''') -> Right ((map fst as) ++ [a], afterClosingParenthesis s'')
+            Right(a, s''') -> Right ((map fst as) ++ [a], afterClosingParenthesis s''')
             Left(x) -> Left ("Error ParseList - Invalid Parser argument")
           False -> Left("Error ParseList - no closing parenthesis in : " ++ s'')
       Left(x') -> Left ("Error ParseList - Invalid Parser argument 2")
@@ -147,8 +141,46 @@ module Parser where
   parseCpt :: Parser Cpt
   parseCpt = Parser (\s -> case runParser (parseInt) s of
     Right (i, s') -> Right (Num i, s')
-    Left(x) -> case runParser (parseList parseCpt) s of
-      Right (l, s') -> Right (Node l, s')
-      Left(x) -> case parseUntilNextSpace s of
-        Right (l, s') -> Right (Symbole l, s')
-        Left(x) -> Left("Error ParseCpt"))
+    Left(x) -> case runParser (Symbole <$> parseString) s of
+      Right res -> Right res
+      Left(x) -> case runParser (parseList parseCpt) s of
+        Right (l, s') -> Right (Node l, s')
+        Left(x) -> case parseUntilNextSpace s of
+          Right (l, s') -> Right (Symbole l, s')
+          Left(x) -> Left("Error ParseCpt"))
+
+
+    --       parseCpt = Parser (\s -> case runParser (parseInt) s of
+    -- Right (i, s') -> Right (Num i, s')
+    -- Left(x) -> case runParser (parseString) s of
+    --   Right (s', s'') -> Right (Symbole s', s'')
+    --   Left(x) -> case runParser (parseList parseCpt) s of
+    --     Right (l, s') -> Right (Node l, s')
+    --     Left(x) -> Left("Error ParseCpt"))
+
+  -- CpttoAst :: Cpt -> Ast
+  -- CpttoAst (Num i) = AstNum i
+  -- CpttoAst (Symbole s) = AstSymbole s
+  -- CpttoAst (Node l) = AstNode (map CpttoAst l)
+
+  -- parseCptToAst :: Parser Ast
+  -- parseCptToAst = Parser (\s -> case runParser parseCpt s of
+  --   Right (c, s') -> Right (CpttoAst c, s')
+  --   Left(x) -> Left("Error ParseCptToAst"))
+
+  -- parseCptToAstWithWhiteSpace :: Parser Ast
+  -- parseCptToAstWithWhiteSpace = Parser (\s -> case runParser (parseAndWith (,) parseCptToAst parseWhiteSpace) s of
+  --   Right (a, s') -> Right (a, s')
+  --   Left(x) -> Left("Error ParseCptToAstWithWhiteSpace"))
+
+  -- parseCptToAstWithWhiteSpaceAndList :: Parser [Ast]
+  -- parseCptToAstWithWhiteSpaceAndList = Parser (\s -> case runParser (parseMany parseCptToAstWithWhiteSpace) s of
+  --   Right (a, s') -> Right (a, s')
+  --   Left(x) -> Left("Error ParseCptToAstWithWhiteSpaceAndList"))
+
+  -- parseCptToAstWithWhiteSpaceAndListAndEnd :: Parser [Ast]
+  -- parseCptToAstWithWhiteSpaceAndListAndEnd = Parser (\s -> case runParser (parseAndWith (,) parseCptToAstWithWhiteSpaceAndList parseWhiteSpace) s of
+  --   Right (a, s') -> case s' of
+  --     "" -> Right (a, s')
+  --     _ -> Left("Error ParseCptToAstWithWhiteSpaceAndListAndEnd")
+  --   Left(x) -> Left("Error ParseCptToAstWithWhiteSpaceAndListAndEnd"))
