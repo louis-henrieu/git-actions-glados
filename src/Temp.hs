@@ -1,7 +1,7 @@
 module Temp
     ( 
-        nexti
+        nextI
     ) where
         
-nexti :: Char -> Char
-nexti x = 'd'
+nextI :: Char -> Char
+nextI x = 'd'
