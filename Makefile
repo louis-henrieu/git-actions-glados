@@ -23,6 +23,7 @@ debug:
 
 clean:
 				stack clean
+				$(RM) src/*.hi src/*.o
 
 flcean:			clean
 				$(RM) test/coverage

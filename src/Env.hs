@@ -1,23 +1,34 @@
 module Env (
     envStorage,
     updateEnv,
-    printAllEnv
+    printAllEnv,
+    replaceEnv
 ) where
     import Info
     import BasicFunc
     import Prelude hiding (lookup)
+    import Keywords
 
     envStorage :: Env
     envStorage = [
-        ("+", (Builtin pre_add)),
-        ("-", (Builtin pre_sub)),
-        ("*", (Builtin pre_mul)),
-        ("/", (Builtin pre_div)),
-        ("mod", (Builtin pre_mod))
+        ("+", (Builtin preAdd)),
+        ("-", (Builtin preSub)),
+        ("*", (Builtin preMul)),
+        ("/", (Builtin preDiv)),
+        ("mod", (Builtin preMod)),
+        ("eq?", (Builtin preEqFunc))
         ]
 
     updateEnv :: String -> Ast -> Env -> Env
     updateEnv symbol ast env = (symbol, ast) : env
+
+    replaceEnv :: String -> Ast -> [(String, Ast)] -> Env
+    replaceEnv symbol ast [] = updateEnv symbol ast []
+    replaceEnv symbol ast ((s, a):xs) = 
+        if s == symbol then
+            (symbol, ast) : xs
+        else
+            replaceEnv symbol ast xs
 
     printAllEnv :: Env -> IO ()
     printAllEnv [] = return ()

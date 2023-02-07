@@ -27,8 +27,11 @@ library
       Ast
       BasicFunc
       Cpt
+      Define
       Env
       Info
+      Keywords
+      Lambda
       Lib
       Temp
   other-modules:
@@ -58,9 +61,11 @@ test-suite glados-test
   other-modules:
       Tbasicfunc
       Tcpt
+      Tdefine
       Tenv
       Test1
       Tinfo
+      Tkeywords
       Paths_glados
   hs-source-dirs:
       test

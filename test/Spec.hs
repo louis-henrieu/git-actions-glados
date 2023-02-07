@@ -9,6 +9,8 @@ import Tcpt
 import Tenv
 import Tinfo
 import Tbasicfunc
+import Tkeywords
+import Tdefine
 
 main :: IO ()
 main = hspec $ do
@@ -17,3 +19,5 @@ main = hspec $ do
     testEnv
     testInfo
     testBasicFunc
+    testKeywords
+    testDefine
