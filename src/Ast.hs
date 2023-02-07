@@ -4,7 +4,67 @@ module Ast where
     import Env
     import Define
 
+    checkOnlySymbols :: [Cpt] -> Either String Bool
+    checkOnlySymbols [] = Right True
+    checkOnlySymbols (x:xs) = case x of
+        Symbol _ -> checkOnlySymbols xs
+        _ -> Left ("Error :" ++ show x ++ " is not a symbol")
 
+    parsingDefine :: Cpt -> Either String Ast
+    parsingDefine (List (Symbol "define":Symbol s:xs)) = case length xs of
+        1 -> case cptToAst (head xs) of
+            Left err -> Left ("The ast part of the define is invalid: " ++ err)
+            Right ast -> Right (Define s ast)
+        _ -> Left "The define form is invalid"
+    parsingDefine (List (Symbol "define":List x:xs)) = 
+        if (length xs == 1) && (checkOnlySymbols x == Right True) then
+            (case cptToAst (head xs) of
+                Left err -> Left ("The ast part of the define is invalid: " ++ err)
+                Right ast -> Right (DefineAlt (map (\ (Symbol s) -> s) x) ast))
+        else
+            Left "The define form is invalid"
+    parsingDefine _ = Left "The define form is invalid"
+
+    parsingList :: Cpt -> Either String Ast
+    parsingList (List (Symbol "define":xs)) = parsingDefine (List (Symbol "define":xs))
+    parsingList (List (Symbol "lambda":List x:xs)) = if length xs == 1 then 
+        if null x then
+            case cptToAst (head xs) of
+                Left err -> Left ("The ast part of the lambda is invalid: " ++ err)
+                Right ast -> case ast of
+                    SymbolAst s -> Right (Lambda [] (SymbolAst s))
+                    Call s -> Right (Lambda [] (Call s))
+                    _ -> Left "The lambda form is invalid"
+            else if checkOnlySymbols x == Right True then
+                case cptToAst (head xs) of
+                    Left err -> Left ("The ast part of the lambda is invalid: " ++ err)
+                    Right ast -> case ast of
+                        SymbolAst s -> Right (Lambda (map (\(Symbol s) -> s) x) (SymbolAst s))
+                        Call s -> Right (Lambda (map (\(Symbol s) -> s) x) (Call s))
+                        _ -> Left "The lambda form is invalid"
+                else
+                    Left "The lambda form is invalid"
+        else
+            Left "The lambda form is invalid"
+    parsingList (List (Symbol "if":x:y:z:xs)) = if null xs then
+        case cptToAst x of
+            Left err -> Left ("The ast part of the if is invalid: " ++ err)
+            Right ast -> case cptToAst y of
+                Left err -> Left ("The ast part of the if is invalid: " ++ err)
+                Right ast2 -> case cptToAst z of
+                    Left err -> Left ("The ast part of the if is invalid: " ++ err)
+                    Right ast3 -> Right (If ast ast2 ast3)
+        else
+            Left "The if form is invalid"
+    parsingList (List s) = Right (Call (map (\x -> case cptToAst x of
+        Left err -> error err
+        Right ast -> ast) s))
+    parsingList _ = Left "Error in cptToAst: this is not a valid list"
+
+    cptToAst :: Cpt -> Either String Ast
+    cptToAst (Number n) = Right (IntegerAst n)
+    cptToAst (Symbol s) = Right (SymbolAst s)
+    cptToAst (List x) = parsingList (List x)
     --convertArgs :: [Ast] -> Env -> [Ast]
     -- convert the symbol to the value
     convertArgs :: [Ast] -> Env -> [Ast]
@@ -58,9 +118,12 @@ module Ast where
     preEvalAst (Define x y) env = Right (Define x y)
     preEvalAst (IntegerAst i) env = Right (IntegerAst i)
     preEvalAst (FloatAst f) env = Right (FloatAst f)
+    preEvalAst (SymbolAst "#t") env = Right (SymbolAst "#t")
+    preEvalAst (SymbolAst "#f") env = Right (SymbolAst "#f")
     preEvalAst (SymbolAst x) env = case getValueEnv env x of
         Right ast -> Right ast
         Left err -> Left err
+    preEvalAst (If x y z) env = Right (If x y z)
     preEvalAst (Call c) env = Right (Call c)
     preEvalAst (Lambda x y) env = Right (Lambda x y)
     preEvalAst (DefineAlt x y) env = Right (DefineAlt x y)
@@ -74,22 +137,22 @@ module Ast where
         False -> Right (Empty, (n, ArgsLambda (args, ast)):env)
     evalAst (IntegerAst i) env = Right (IntegerAst i, env)
     evalAst (FloatAst f) env = Right (FloatAst f, env)
-    evalAst (Call(SymbolAst "if":x:y:z:xs)) env = case length (y:z:xs) of
-        2 -> case evalAst x env of
-            Right (s, env) -> case s of
-                SymbolAst "#t" -> case preEvalAst y env of
-                    Right ast -> case evalAst ast env of
-                        Right (ast, env) -> Right (ast, env)
-                        Left err -> Left err
-                    Left err -> Left err
-                SymbolAst "#f" -> case preEvalAst z env of
-                    Right ast -> case evalAst ast env of
-                        Right (ast, env) -> Right (ast, env)
-                        Left err -> Left err
-                    Left err -> Left err
-                _ -> Left "If condition must be a boolean"
+    evalAst (If x y z) env = case preEvalAst x env of
+        Left err -> Left err
+        Right ast -> case evalAst ast env of
             Left err -> Left err
-        _ -> Left ("There is " ++ show (length xs) ++ "arguments after the if condition")
+            Right (ast, env2) -> case ast of
+                SymbolAst("#t") -> case preEvalAst y env2 of
+                    Left err -> Left err
+                    Right ast -> case evalAst ast env2 of
+                        Left err -> Left err
+                        Right (ast, env3) -> Right (ast, env3)
+                SymbolAst("#f") -> case preEvalAst z env2 of
+                    Left err -> Left err
+                    Right ast -> case evalAst ast env2 of
+                        Left err -> Left err
+                        Right (ast, env3) -> Right (ast, env3)
+                _ -> Left "Error in if"
     evalAst (Call(SymbolAst x:xs)) env = case getValueEnv env x of
         Left err -> Left err
         Right res -> case res of
@@ -100,10 +163,3 @@ module Ast where
             _ -> Left (x ++ " is not a function")
     evalAst (Lambda x y) env = Right(SymbolAst "#<procedure>", env)
     evalAst (Call((Lambda x y):z)) env = lambdaFunc x y z env
- 
-    -- evalAst (Lambda lx ly) env = Left("Need : Lambda")
-    -- evalAst (If ix iy iz) env = Left("Need : If")
-    -- evalAst (BuiltIn b) env = Left("Need : BuiltIn")
-    -- evalAst (Call (SymbolAst f : xs)) env = case getValueEnv env f of
-    --     Right x -> Right(Empty, env)
-    --     Left err -> Left err

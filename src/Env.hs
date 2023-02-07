@@ -22,7 +22,9 @@ module Env (
         ("div", (Builtin preDiv)),
         ("mod", (Builtin preMod)),
         ("eq?", (Builtin preEqFunc)),
-        ("==", (Builtin preEqFunc))
+        ("==", (Builtin preEqFunc)),
+        ("<", (Builtin preInf)),
+        (">", (Builtin preSup))
         ]
 
     updateEnv :: String -> Ast -> Env -> Env

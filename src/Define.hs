@@ -33,5 +33,3 @@ module Define (
         _ -> case isInEnv name env of
             False -> Right (Empty, (name, value):env)
             True -> Right (Empty, replaceInEnv name value env)
-
--- Right (Empty, replaceInEnv name value env)

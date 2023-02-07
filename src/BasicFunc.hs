@@ -4,6 +4,8 @@ module BasicFunc (
     preMul,
     preDiv,
     preMod,
+    preInf,
+    preSup,
 ) where
 
     import Info
@@ -121,3 +123,31 @@ module BasicFunc (
 
     fact :: Int -> Ast
     fact x = IntegerAst (product [1..x])
+
+    preSup :: [Ast] -> Env -> Either String Ast
+    preSup [] env = Left "> operator needs at least two arguments"
+    preSup args env = case length args of
+        2 -> case checkIfEmpty args of
+            True -> sup args env
+            False -> Left ("There is at least one symbol that isn't defined" ++ show args)
+        _ -> Left "> operator needs at least two arguments"
+
+    sup :: [Ast] -> Env -> Either String Ast
+    sup [] env = Left "> operator needs at least two arguments"
+    sup (IntegerAst x : IntegerAst y : []) env = case x > y of
+        True -> Right (SymbolAst "#t")
+        False -> Right (SymbolAst "#f")
+    
+    preInf :: [Ast] -> Env -> Either String Ast
+    preInf [] env = Left "< operator needs at least two arguments"
+    preInf args env = case length args of
+        2 -> case checkIfEmpty args of
+            True -> inf args env
+            False -> Left ("There is at least one symbol that isn't defined" ++ show args)
+        _ -> Left "< operator needs at least two arguments"
+    
+    inf :: [Ast] -> Env -> Either String Ast
+    inf [] env = Left "< operator needs at least two arguments"
+    inf (IntegerAst x : IntegerAst y : []) env = case x < y of
+        True -> Right (SymbolAst "#t")
+        False -> Right (SymbolAst "#f")

@@ -11,7 +11,6 @@ module Info where
         | FloatAst Float
         | SymbolAst String
         | Lambda [String] Ast
-        -- | Function [Ast] -> Either String Ast
         | ArgsLambda ([String], Ast)
         | If Ast Ast Ast
         | Builtin ([Ast] -> Env -> Either String Ast)
