@@ -9,6 +9,8 @@ PATH_BIN	:=	$(shell stack path --local-install-root)
 
 RM		=		rm -rf
 
+CONF_NAME	=		glados.cabal
+
 FT_NAME	=		test_glados.sh
 
 NAME	=		glados
@@ -27,9 +29,9 @@ clean:
 				stack clean
 				$(RM) src/*.hi src/*.o
 
-flcean:			clean
+fclean:			clean
 				$(RM) test/coverage
-				$(RM) $(NAME)
+				$(RM) $(NAME) $(CONF_NAME)
 
 re:				flcean all
 
