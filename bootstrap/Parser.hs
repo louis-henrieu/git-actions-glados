@@ -1,14 +1,12 @@
 module Parser where
+
 import Control.Applicative
-import Data.Either
---data Cpt = Num Int | List [Cpt] | Symbole String deriving Show
 
 data Cpt = Num Int | Node [Cpt] | Symbole String deriving (Show)
 
-data Parser a = Parser {
-  runParser :: String -> Either String (a, String)
-}
-
+data Parser a = Parser
+  { runParser :: String -> Either String (a, String)
+  }
 
 instance Functor Parser where
   fmap fct parser =
@@ -125,17 +123,17 @@ parseInt =
         Left (x) -> runParser parseUInt s
     )
 
-parseString :: Parser String
-parseString =
-  Parser
-    ( \s -> case runParser (parseMany (parseAnyChar ['a' .. 'z'])) s of
-        Right (cs, s') -> case cs of
-          "" -> Left ("Error ParseString")
-          _ -> case runParser (parseAnyChar ['a' .. 'z']) cs of
-            Right (c, s'') -> Right (cs, s')
-            Left (x) -> Left ("Error ParseString")
-        Left (x) -> Left ("Error ParseString")
-    )
+-- parseString :: Parser String
+-- parseString =
+--   Parser
+--     ( \s -> case runParser (parseMany (parseAnyChar ['a' .. 'z'])) s of
+--         Right (cs, s') -> case cs of
+--           "" -> Left ("Error ParseString")
+--           _ -> case runParser (parseAnyChar ['a' .. 'z']) cs of
+--             Right (c, s'') -> Right (cs, s')
+--             Left (x) -> Left ("Error ParseString")
+--         Left (x) -> Left ("Error ParseString")
+--     )
 
 parseWhiteSpace :: Parser String
 parseWhiteSpace = parseMany (parseChar ' ')
@@ -174,100 +172,87 @@ parseList p =
         Left (x) -> Left ("Error ParseList - no opening parenthesis in : \'" ++ s ++ "\'")
     )
 
+-- parseList :: Parser a -> Parser [a]
+-- parseList p = Parser ( \s -> case runParser (parseChar '(') s of
+--         Right (c, s') -> case runParser (parseMany p) s' of
+--           Right (as, s'') -> case runParser (parseChar ')') s'' of
+--             Right (c, s''') -> Right (as, s''')
+--             Left (x) -> Left ("Error ParseList")
+--           Left (x) -> Left ("Error ParseList")
+--         Left (x) -> Left ("Error ParseList")
+--     )
+
+
+-- parsing a list of elements separated by a separator
+
+
+-- parseList :: Parser a -> Parser [a]
+-- parseList p =
+--   Parser
+--     ( \s -> case runParser (parseChar '(') s of
+--         Right (c, s') -> case runParser (parseManyWSepar ' ' p) s' of
+--           Right (res, []) -> Left ("ERROR PARSE LIST: Missing closing char")
+--           Right (res, ')':s) -> Right (res, s)
+--           Right (res, '(':s) -> (runParser (joinParseList res)) ('(':s)
+--           Right (res, x:s) -> (runParser (joinParseList res)) (x:s)
+--           Left (x) -> Left ("Error ParseList")
+--     )
+
+
+-- joinParseList :: [Cpt] -> Parser Cpt
+-- joinParseList prec = Parser (\s -> case (runParser parseList) s of
+--   Right (res, ')':s) -> Right (List (prec ++ [res]), (s))
+--   Right (res, s) -> Right (List (prec ++ [res]), (s))
+--   Left (x) -> Left ("ERROR joinParseList" ++ x))
+
+-- parseList :: Parser Cpt
+-- parseList = Parser (\s -> case runParser (parseChar '(') s of
+--   Right (c, s') -> case runParser (parseManyWSepar ' ' parseElem) (s') of
+--     Right (res, []) -> Left ("ERROR PARSE LIST: Missing closing char")
+--     Right (res, ')':s) -> Right (List res, s)
+--     Right (res, '(':s) -> (runParser (joinParseList res)) ('(':s)
+--     Right (res, x:s) -> Left ("ERROR PARSE LIST: Missing closing char" ++ x:s)
+--     Left (x) -> Left ("ERROR: Parse List" ++ x)
+--   Left (x) -> Left ("ERROR ParseList no case defined" ++ x))
+
+-- parseElem :: Parser Cpt
+-- parseElem = (Num <$> parseInt) <|> (Symbole <$> parseString) <|> (Symbole <$> parseSome (parseAnyChar "+-*/%"))
+-- parseSeparChar :: String -> Char -> String
+-- parseSeparchar s c = case s of
+--   x:s x == c -> s
+--   s -> s
+
+--   -- parseManyWSepar is a parser that parse a list of elements separated by a char
+
+-- parseManyWSepar :: Char -> Parser a -> Parser [a]
+-- parseManyWSepar c p = Parser (\s -> case runParser p s of
+--   Right (a, s') -> case runParser (parseManyWSepar c p) (parseSeparChar s' c) of
+--     Right (as, s'') -> Right (a:as, s'')
+--     Left(x) -> Right ([a], s')
+--   Left(x) -> Right ([], s))
+
 parseUntilNextSpace :: String -> Either String (String, String)
-parseUntilNextSpace [] = Left ("Error ParseUntilNextSpace")
+parseUntilNextSpace [] = Right ("", "")
 parseUntilNextSpace (x : xs) = case x of
   ' ' -> Right ("", xs)
   _ -> case parseUntilNextSpace xs of
     Right (s, s') -> Right (x : s, s')
     Left (x) -> Left ("Error ParseUntilNextSpace")
 
+
+parseString :: Parser String
+parseString = parseSome (parseAnyChar ['a' .. 'z'] <|> parseAnyChar ['A' .. 'Z'] <|> parseAnyChar ['0' .. '9'] <|> parseAnyChar "+-*/%=<>")
+
 parseCpt :: Parser Cpt
-parseCpt =
-  Parser
-    ( \s -> case runParser (parseInt) s of
-        Right (i, s') -> Right (Num i, s')
-        Left (x) -> case runParser (Symbole <$> parseString) s of
-          Right res -> Right res
-          Left (x) -> case runParser (parseList parseCpt) s of
-            Right (l, s') -> Right (Node l, s')
-            Left (x) -> case parseUntilNextSpace s of
-              Right (l, s') -> Right (Symbole l, s')
-              Left (x) -> Left ("Error ParseCpt")
-    )
-
--- map parseCpt qui dure jusqu'au next close
---parseList :: Parser Cpt -> Parser [Cpt]
---parseList p = 
-
-parseElem :: Parser Cpt
-parseElem = (Num <$> parseInt) <|> (Symbole <$> parseString) <|> (Symbole <$> parseSome (parseAnyChar "+-*/%"))
-
-parseFixString :: Parser String
-parseFixString = (parseWhiteSpace) <|> (parseMany (parseChar '\n'))
-
-cleanString :: Parser String
-cleanString = Parser (\s -> case (runParser parseFixString) s of
-  Left x -> Right ("", s)
-  Right (caught, rest) -> Right (caught, rest))
-
--- res = [Cpt]
--- parseList -> List [Cpt] => [Cpt] <-- List [Cpt] what I want to do
--- ============================================================
---joinParseList :: [Cpt] -> Parser Cpt
---joinParseList prec = Parser (\s -> case (runParser parseList) s of
---  -- Right (res, ')':[]) -> Right (List (prec ++ [res]), (s))
---  Right (res, []) -> Right (List (prec ++ [res]), [])
---  -- Right (res, s) -> (runParser (joinParseList (prec ++ [res]))) (s)  --Right (List (prec ++ [res]), (s))
---  Right (res, s) -> (runParser (joinParseList (prec ++ [res]) )) (s)
---  Left (x) -> Left ("ERROR joinParseList:" ++ x))
---
---parseList :: Parser Cpt
---parseList = Parser (\s -> case runParser (parseManyWSepar ' ' (parseChar '(')) s of
---  Right (c, s') -> case runParser (parseManyWSepar ' ' parseElem) (s') of
---    Right (res, []) -> Right (List res, [])
---    Right (res, ')':s) -> Right (List res, s)
---    Right (res, '(':s) -> (runParser (joinParseList res)) ('(':s)
---    Right (res, x:s) -> Left ("ERROR PARSE LIST: Missing closing char:" ++ x:s)
---    Left (x) -> Left ("ERROR: Parse List" ++ x)
---  Left (x) -> Left ("ERROR ParseList no case defined" ++ x))
-
--- ==========================================================
-
---parseContent :: Parser [Cpt]
---parseContent = Parser (\s -> case runParser cleanString s of
---  Right (_, s) -> case (runParser parseElem) s of
---    Right (cpt, ')':s) -> Right ([], s)
---    Right (cpt, s) -> Right (cpt : (fst (runParser parseContent s)), (snd (runParser parseContent s)))
---    Left x -> Left x
---  Left x -> Left x)
-
-parseContent :: Parser [Cpt]
-parseContent = Parser (\s -> case runParser (parseMany (parseAndWith (\a b -> b) cleanString parseElem)) s of
-  Right res -> Right res
-  Left x -> Left ("Parse Content ERROR" ++ x))
-  
-
-  --parseCpt :: Parser [Cpt]
-  --parseCpt = Parser (\s -> case runParser cleanString s of
-  --  Right (_, s) -> case runParser (parseChar '(') s of
-  --    Right (c, s) -> case runParser cleanString s of
-  --      Right (_, s) -> case (runParser parseContent) s of
-  --        Right () )
-
-  --cleanEntry :: Parser a -> Parser a
-  --cleanEntry p = case p of
-  --  Left x -> Left x
-  --  Right (a, s) -> case (runParser parseFixString) s of
-  --    Left x -> Right (a, s)
-  --    Right (caught, rest) -> Right (a, rest)
-
-  
-
-    --       parseCpt = Parser (\s -> case runParser (parseInt) s of
-    -- Right (i, s') -> Right (Num i, s')
-    -- Left(x) -> case runParser (parseString) s of
-    --   Right (s', s'') -> Right (Symbole s', s'')
-    --   Left(x) -> case runParser (parseList parseCpt) s of
-    --     Right (l, s') -> Right (Node l, s')
-    --     Left(x) -> Left("Error ParseCpt"))
+parseCpt = (Num <$> parseInt) <|> (Node <$> parseList parseCpt) <|> (Symbole <$> parseString)
+  -- Parser
+  --   ( \s -> case runParser (parseInt) s of
+  --       Right (i, s') -> Right (Num i, s')
+  --       Left (x) -> case runParser (Symbole <$> parseString) s of
+  --         Right res -> Right res
+  --         Left (x) -> case runParser (parseList parseCpt) s of
+  --           Right (l, s') -> Right (Node l, s')
+  --           Left (x) -> case parseUntilNextSpace s of
+  --             Right (l, s') -> Right (Symbole l, s')
+  --             Left (x) -> Left ("Error ParseCpt")
+  --   )
