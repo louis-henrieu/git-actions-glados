@@ -18,7 +18,7 @@ testGetValueEnv = describe "Test getValueEnv function" $ do
     it "Test getValueEnv with empty env" $ do
         let test = getValueEnv [] "a"
         let rest = show test
-        rest `shouldBe` "Left \"Symbole : 'a' not found\""
+        rest `shouldBe` "Left \"Symbol 'a' not found\""
     it "Test getValueEnv with env with one value" $ do
         let test = getValueEnv [("a", IntegerAst 1)] "a"
         let rest = show test
