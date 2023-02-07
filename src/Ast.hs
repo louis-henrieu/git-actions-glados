@@ -4,6 +4,22 @@ module Ast where
     import Env
     import Define
 
+
+    --convertArgs :: [Ast] -> Env -> [Ast]
+    -- convert the symbol to the value
+    convertArgs :: [Ast] -> Env -> [Ast]
+    convertArgs [] _ = []
+    convertArgs (arg:args) env = case arg of
+        SymbolAst s -> case getValueEnv env s of
+            Right x -> x : convertArgs args env
+            Left err -> Empty : convertArgs args env
+        Call x -> case evalAst (Call x) env of
+            Right x -> case fst x of
+                Empty -> Empty : convertArgs args env
+                _ -> fst x : convertArgs args env
+            Left err -> Empty : convertArgs args env
+        _ -> arg : convertArgs args env
+
     -- cptToAst :: Cpt -> Either String Ast
     -- cptToAst (Number i) = Right (IntegerAst i)
     -- cptToAst (Symbol s) = Right (SymbolAst s)
@@ -33,7 +49,7 @@ module Ast where
         then do
             let env2 = updateAllEnv symbols args env
             case evalAst ast env2 of
-                Right (ast, env3) -> Right (ast, env)
+                Right (ast, env3) -> Right (ast, env3)
                 Left err -> Left err
         else
             Left "Error in lambda - Invalid number of arguments"
@@ -60,21 +76,26 @@ module Ast where
     evalAst (FloatAst f) env = Right (FloatAst f, env)
     evalAst (Call(SymbolAst "if":x:y:z:xs)) env = case length (y:z:xs) of
         2 -> case evalAst x env of
-            Right (SymbolAst "#t", _) -> case preEvalAst y env of
-                Right ast -> evalAst ast env
-                Left err -> Left err
-            Right (SymbolAst "#f", _) -> case preEvalAst z env of
-                Right ast -> evalAst ast env
-                Left err -> Left err
-            Right _ -> Left "If condition must be a boolean"
+            Right (s, env) -> case s of
+                SymbolAst "#t" -> case preEvalAst y env of
+                    Right ast -> case evalAst ast env of
+                        Right (ast, env) -> Right (ast, env)
+                        Left err -> Left err
+                    Left err -> Left err
+                SymbolAst "#f" -> case preEvalAst z env of
+                    Right ast -> case evalAst ast env of
+                        Right (ast, env) -> Right (ast, env)
+                        Left err -> Left err
+                    Left err -> Left err
+                _ -> Left "If condition must be a boolean"
             Left err -> Left err
         _ -> Left ("There is " ++ show (length xs) ++ "arguments after the if condition")
     evalAst (Call(SymbolAst x:xs)) env = case getValueEnv env x of
         Left err -> Left err
         Right res -> case res of
             ArgsLambda (x, y) -> lambdaFunc x y xs env
-            Builtin f -> case f xs env of
-                Left err -> Left err
+            Builtin f -> case f (convertArgs xs env) env of
+                Left err -> Left ("Error in builtin function " ++ x ++ " : " ++ err ++ "\n\n env is : " ++ show env)
                 Right ast -> Right (ast, env)
             _ -> Left (x ++ " is not a function")
     evalAst (Lambda x y) env = Right(SymbolAst "#<procedure>", env)
