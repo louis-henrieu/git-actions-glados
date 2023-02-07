@@ -52,7 +52,7 @@ goToNextWord s = case s of
     ' ':s -> s
     '(':s -> s
     ')':s -> s
-    x:s -> goToNextWord s 
+    x:s -> goToNextWord s
 
 goToClose :: String -> Int -> String -- get to the end of the as start parenthesis
 goToClose [] _ = ""
