@@ -27,6 +27,7 @@ library
       Ast
       BasicFunc
       Cpt
+      Define
       Env
       Info
       Keywords
