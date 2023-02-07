@@ -1,5 +1,6 @@
 module Keywords (
-    preEqFunc
+    preEqFunc,
+    eqFunc
 ) where
     
 import Info
@@ -10,7 +11,7 @@ preEqFunc [] env = Left "If function needs at least three arguments"
 preEqFunc args env = case length args of
     2 -> case checkIfEmpty (convertArgs args env) of
         True -> eqFunc (convertArgs args env) env
-        False -> Left "There is at least a symbol that doesn't exist"
+        False -> Left "There is at least one symbol that isn't defined"
     _ -> Left "If function needs at least three arguments"
 
     
