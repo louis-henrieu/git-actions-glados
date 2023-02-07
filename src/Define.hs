@@ -1,5 +1,6 @@
 module Define (
     defineFunc,
+    isInEnv,
 ) where
 
     import Info
@@ -19,6 +20,18 @@ module Define (
                 (key, ast) : replaceInEnv name value xs
 
     defineFunc :: String -> Ast -> Env ->  Either String (Ast, Env)
-    defineFunc name value env = case isInEnv name env of
-        True -> Right (Empty, replaceInEnv name value env)
-        False -> Right (Empty, updateEnv name value env)
+    defineFunc name value env = case value of
+        (Lambda x y) -> case isInEnv name env of
+            False -> Right (Empty, (name, ArgsLambda (x, y)):env)
+            True -> Right (Empty, replaceInEnv name (ArgsLambda (x, y)) env)
+
+        (SymbolAst x) -> case getValueEnv env x of
+            Left err -> Left err
+            Right ast -> case isInEnv name env of
+                False -> Right (Empty, (name, ast):env)
+                True -> Right (Empty, replaceInEnv name ast env)
+        _ -> case isInEnv name env of
+            False -> Right (Empty, (name, value):env)
+            True -> Right (Empty, replaceInEnv name value env)
+
+-- Right (Empty, replaceInEnv name value env)

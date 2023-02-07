@@ -29,7 +29,7 @@ evalAll (x:xs) env =
         Right ast -> case evalAst ast env of
             Right result -> case (fst result) of
                 Empty -> evalAll xs (snd result)
-                _ -> printAst (fst result)
+                _ -> printAst (fst result) >> evalAll xs (snd result)
             Left err -> print (err)
         Left err -> print (err)
 
@@ -62,7 +62,7 @@ someFunc env = do
     putStrLn "test add foo 42\nfoo is defined as IntegerAst 42\nShould return 84"
     evalAll [Define "foo" (IntegerAst 42), Call [SymbolAst "+", SymbolAst "foo", IntegerAst 42]] env
 
-    putStrLn "\n\n"
+    putStrLn "\n\n test add foo 42\nfoo is defined as IntegerAst 42 then as IntegerAst 0 \nShould return 42"
     evalAll [Define "foo" (IntegerAst 42), Define "foo" (IntegerAst 0), Call [SymbolAst "+", SymbolAst "foo", IntegerAst 42]] env
 
     putStrLn ("\n\n test sub :\n-------------\ntest sub 0 42 :\nShould return -42")
@@ -105,3 +105,36 @@ someFunc env = do
     evalFunc (Call[Lambda ["a", "b"] (Call[SymbolAst "*", SymbolAst "a", SymbolAst "b"]), IntegerAst 3, IntegerAst 3]) env
     putStrLn "\n\n(lambda (a b) (* a b)) should return a procedure"
     evalFunc (Lambda ["a", "b"] (Call[SymbolAst "*", SymbolAst "a", SymbolAst "b"])) env
+
+    putStrLn "\n\n(define add (lambda (a b) (+ a b)))\n(add 2 2)\nShould return 4"
+    evalAll [Define "add" (Lambda ["a", "b"] (Call[SymbolAst "+", SymbolAst "a", SymbolAst "b"])), Call[SymbolAst "add", IntegerAst 2, IntegerAst 2]] env
+
+    putStrLn "\n\n(define foo 21)(* foo 2) | should return 42"
+    evalAll [Define "foo" (IntegerAst 21), Call[SymbolAst "*", SymbolAst "foo", IntegerAst 2]] env
+
+    putStrLn "(* foo 2)"
+    evalFunc (Call[SymbolAst "*", SymbolAst "foo", IntegerAst 2]) env
+
+    putStrLn "\n\nTest call variable foo undefined before\nShould return an error"
+    evalFunc (SymbolAst "foo") env
+
+    putStrLn ("\n\n(define foo 42) foo" ++ "\nShould return 42")
+    evalAll [Define "foo" (IntegerAst 42), SymbolAst "foo"] env
+
+    putStrLn ("\n\n(if #t 1 2)" ++ "\nShould return 1")
+    evalFunc (Call [SymbolAst "if", SymbolAst "#t", IntegerAst 1, IntegerAst 2]) env
+
+    putStrLn ("\n\n(if #f 1 2)" ++ "\nShould return 2")
+    evalFunc (Call [SymbolAst "if", SymbolAst "#f", IntegerAst 1, IntegerAst 2]) env
+
+    putStrLn ("\n\n(define foo 42) (if (eq? foo 42) (* foo 3) (/ foo 2))" ++ "\nShould return 126")
+    evalAll [Define "foo" (IntegerAst 42), Call [SymbolAst "if", Call [SymbolAst "eq?", SymbolAst "foo", IntegerAst 42], Call [SymbolAst "*", SymbolAst "foo", IntegerAst 3], Call [SymbolAst "/", SymbolAst "foo", IntegerAst 2]]] env
+    
+    putStrLn ("\n\n(+ (* 2 3) (div 10 2))" ++ "\nShould return 7")
+    evalFunc (Call [SymbolAst "+", Call [SymbolAst "*", IntegerAst 2, IntegerAst 3], Call [SymbolAst "/", IntegerAst 10, IntegerAst 2]]) env
+
+    putStrLn ("\n\n(define (add a b) (+ a b)) (add 2 2)" ++ "\nShould return 5")
+    evalAll [DefineAlt ["mul", "a", "b"] (Call [SymbolAst "+", SymbolAst "a", SymbolAst "b"]), Call [SymbolAst "mul", IntegerAst 2, IntegerAst 3]] env
+
+    putStrLn ("\n\n(define (add a b) (+ a b)) (add 2 2)" ++ "\nShould return 6")
+    evalAll [DefineAlt ["add", "a", "b"] (Call [SymbolAst "*", SymbolAst "a", SymbolAst "b"]), Call [SymbolAst "mul", IntegerAst 3, IntegerAst 2]] env

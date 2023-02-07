@@ -21,7 +21,7 @@ module BasicFunc (
         True -> case checkFloatInt (convertArgs args env) env of
             Right True -> add (convertArgs args env) env
             Left err -> Left err
-        False -> Left "There is at least a symbol that doesn't exist"
+        False -> Left "There is at least one symbol that isn't defined"
 
     add :: [Ast] -> Env -> Either String Ast
     add [] env = Right (IntegerAst 0)
@@ -36,7 +36,7 @@ module BasicFunc (
         True -> case checkFloatInt (convertArgs args env) env of
             Right True -> sub (convertArgs args env) env
             Left err -> Left err
-        False -> Left "There is at least a symbol that doesn't exist"
+        False -> Left "There is at least one symbol that isn't defined"
 
     sub :: [Ast] -> Env -> Either String Ast
     sub [] env = Right (IntegerAst 0)
@@ -51,7 +51,7 @@ module BasicFunc (
         True -> case checkFloatInt (convertArgs args env) env of
             Right True -> mul (convertArgs args env) env
             Left err -> Left err
-        False -> Left "There is at least a symbol that doesn't exist"
+        False -> Left "There is at least one symbol that isn't defined"
 
     mul :: [Ast] -> Env -> Either String Ast
     mul [] env = Right (IntegerAst 1)
@@ -89,7 +89,7 @@ module BasicFunc (
                     Right ast -> (division (convertArgs [x, y] env) (env))
                     Left err -> Left err
                 Left err -> Left err
-            False -> Left "There is at least a symbol that doesn't exist"
+            False -> Left "There is at least one symbol that isn't defined"
         _ -> Left "Div function only needs two arguments"
 
     division :: [Ast] -> Env -> Either String Ast
@@ -112,7 +112,7 @@ module BasicFunc (
                     Right ast -> modulo (convertArgs (x:y:xs) env) env
                     Left err -> Left err
                 False -> Left "Mod function only works with integers"
-            False -> Left "There is at least a symbol that doesn't exist"
+            False -> Left "There is at least one symbol that isn't defined"
         _ -> Left "Mod function only needs two arguments"
 
     modulo :: [Ast] -> Env -> Either String Ast
