@@ -17,11 +17,11 @@ module BasicFunc (
     
     preAdd :: [Ast] -> Env -> Either String Ast
     preAdd [] env = Left "Add function needs at least two arguments"
-    preAdd args env = case checkIfEmpty (convertArgs args env) of
-        True -> case checkFloatInt (convertArgs args env) env of
-            Right True -> add (convertArgs args env) env
+    preAdd args env = case checkIfEmpty args of
+        True -> case checkFloatInt args env of
+            Right True -> add args env
             Left err -> Left err
-        False -> Left "There is at least one symbol that isn't defined"
+        False -> Left ("There is at least one symbol that isn't defined" ++ show args)
 
     add :: [Ast] -> Env -> Either String Ast
     add [] env = Right (IntegerAst 0)
@@ -32,11 +32,11 @@ module BasicFunc (
 
     preSub :: [Ast] -> Env -> Either String Ast
     preSub [] env = Left "Sub function needs at least two arguments"
-    preSub args env = case checkIfEmpty (convertArgs args env) of
-        True -> case checkFloatInt (convertArgs args env) env of
-            Right True -> sub (convertArgs args env) env
+    preSub args env = case checkIfEmpty args  of
+        True -> case checkFloatInt args env of
+            Right True -> sub args env
             Left err -> Left err
-        False -> Left "There is at least one symbol that isn't defined"
+        False -> Left ("There is at least one symbol that isn't defined" ++ show args)
 
     sub :: [Ast] -> Env -> Either String Ast
     sub [] env = Right (IntegerAst 0)
@@ -47,11 +47,11 @@ module BasicFunc (
 
     preMul :: [Ast] -> Env -> Either String Ast
     preMul [] env = Left "Mul function needs at least two arguments"
-    preMul args env = case checkIfEmpty (convertArgs args env) of
-        True -> case checkFloatInt (convertArgs args env) env of
-            Right True -> mul (convertArgs args env) env
+    preMul args env = case checkIfEmpty args of
+        True -> case checkFloatInt args env of
+            Right True -> mul args env
             Left err -> Left err
-        False -> Left "There is at least one symbol that isn't defined"
+        False -> Left ("There is at least one symbol that isn't defined" ++ show args)
 
     mul :: [Ast] -> Env -> Either String Ast
     mul [] env = Right (IntegerAst 1)
@@ -62,18 +62,18 @@ module BasicFunc (
 
     checkZero :: Ast -> Env -> Either String Ast
     checkZero (IntegerAst i) env = case i of
-        0 -> Left "Second argument is null"
+        0 -> Left "Second argument is not allowed to be a 0"
         _ -> Right (IntegerAst i)
     checkZero (FloatAst f) env = case f of
-        0 -> Left "Second argument is null"
+        0 -> Left "Second argument is not allowed to be a 0"
         _ -> Right (FloatAst f)
     checkZero (SymbolAst s) env = case getValueEnv env s of
         Right ast -> case ast of
             (IntegerAst i) -> case i of
-                0 -> Left "Second argument is null"
+                0 -> Left "Second argument is not allowed to be a 0"
                 _ -> Right (IntegerAst i)
             (FloatAst f) -> case f of
-                0 -> Left "Second argument is null"
+                0 -> Left "Second argument is not allowed to be a 0"
                 _ -> Right (FloatAst f)
             _ -> Left "The symbol \'s\' isn't valid"
         Left err -> Left err
@@ -83,13 +83,13 @@ module BasicFunc (
     preDiv [] env = Left "Div function needs at least two arguments"
     -- no more than two arguments
     preDiv (x:y:xs) env = case length (x:y:xs) of
-        2 -> case checkIfEmpty (convertArgs (x:y:xs) env) of
-            True -> case checkFloatInt (convertArgs (x:y:xs) env) env of
+        2 -> case checkIfEmpty (x:y:xs) of
+            True -> case checkFloatInt (x:y:xs) env of
                 Right True -> case checkZero (y) env of
-                    Right ast -> (division (convertArgs [x, y] env) (env))
+                    Right ast -> (division ([x, y]) (env))
                     Left err -> Left err
                 Left err -> Left err
-            False -> Left "There is at least one symbol that isn't defined"
+            False -> Left ("There is at least one symbol that isn't defined" ++ show (x:y:xs))
         _ -> Left "Div function only needs two arguments"
 
     division :: [Ast] -> Env -> Either String Ast
@@ -106,13 +106,13 @@ module BasicFunc (
     preMod :: [Ast] -> Env -> Either String Ast
     preMod [] env = Left "Mod function needs at least two arguments"
     preMod (x:y:xs) env = case length (x:y:xs) of
-        2 -> case checkIfEmpty (convertArgs (x:y:xs) env) of
-            True -> case checkOnlyInt (convertArgs (x:y:xs) env) env of
+        2 -> case checkIfEmpty (x:y:xs) of
+            True -> case checkOnlyInt (x:y:xs) env of
                 True -> case checkZero (y) env of
-                    Right ast -> modulo (convertArgs (x:y:xs) env) env
+                    Right ast -> modulo (x:y:xs) env
                     Left err -> Left err
                 False -> Left "Mod function only works with integers"
-            False -> Left "There is at least one symbol that isn't defined"
+            False -> Left ("There is at least one symbol that isn't defined" ++ show (x:y:xs))
         _ -> Left "Mod function only needs two arguments"
 
     modulo :: [Ast] -> Env -> Either String Ast

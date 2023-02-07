@@ -5,12 +5,12 @@ module Lib
         someFunc
     ) where
 
-import Temp
-import Cpt
+import Temp()
+import Cpt()
 import Ast
 import Env
 import Info
-import Keywords
+import Keywords()
 
 printAst :: Ast -> IO ()
 printAst ast = case ast of
@@ -49,7 +49,7 @@ someFunc env = do
 
     printAllEnv env
     putStrLn ("-------------\n\ntest verify scope :\n")
-    putStrLn ("test [(define foo 42), baz]\nShould return 42")
+    putStrLn ("test [(define foo 42), baz]\nShould return an error : Symbol not found")
     evalAll [Define "foo" (IntegerAst 42), SymbolAst "baz"] env
     putStrLn ("-------------\ntest define [(define foo 42), (define baz 42), baz]\nShould return 42")
     evalAll [Define "foo" (IntegerAst 42), Define "baz" (IntegerAst 42), SymbolAst "baz"] env
@@ -71,7 +71,7 @@ someFunc env = do
     evalAll [Define "foo" (IntegerAst 42), Call [SymbolAst "-", SymbolAst "foo", IntegerAst 42]] env
 
     putStrLn ("\n\ntest mul :\n-------------\ntest mul 0 42 :\nShould return 0")
-    evalFunc (Call [SymbolAst "*", IntegerAst 2, IntegerAst 42]) env
+    evalFunc (Call [SymbolAst "*", IntegerAst 0, IntegerAst 42]) env
     putStrLn "\n\ntest mul foo 42\nfoo is defined as IntegerAst 10\nShould return 420"
     evalAll [Define "foo" (IntegerAst 10), Call [SymbolAst "*", SymbolAst "foo", IntegerAst 42]] env
 
@@ -112,7 +112,7 @@ someFunc env = do
     putStrLn "\n\n(define foo 21)(* foo 2) | should return 42"
     evalAll [Define "foo" (IntegerAst 21), Call[SymbolAst "*", SymbolAst "foo", IntegerAst 2]] env
 
-    putStrLn "(* foo 2)"
+    putStrLn "\n\n(* foo 2) | should return an error"
     evalFunc (Call[SymbolAst "*", SymbolAst "foo", IntegerAst 2]) env
 
     putStrLn "\n\nTest call variable foo undefined before\nShould return an error"
@@ -130,7 +130,7 @@ someFunc env = do
     putStrLn ("\n\n(define foo 42) (if (eq? foo 42) (* foo 3) (/ foo 2))" ++ "\nShould return 126")
     evalAll [Define "foo" (IntegerAst 42), Call [SymbolAst "if", Call [SymbolAst "eq?", SymbolAst "foo", IntegerAst 42], Call [SymbolAst "*", SymbolAst "foo", IntegerAst 3], Call [SymbolAst "/", SymbolAst "foo", IntegerAst 2]]] env
     
-    putStrLn ("\n\n(+ (* 2 3) (div 10 2))" ++ "\nShould return 7")
+    putStrLn ("\n\n(+ (* 2 3) (div 10 2))" ++ "\nShould return 11")
     evalFunc (Call [SymbolAst "+", Call [SymbolAst "*", IntegerAst 2, IntegerAst 3], Call [SymbolAst "/", IntegerAst 10, IntegerAst 2]]) env
 
     putStrLn ("\n\n(define (add a b) (+ a b)) (add 2 2)" ++ "\nShould return 5")
@@ -138,3 +138,10 @@ someFunc env = do
 
     putStrLn ("\n\n(define (add a b) (+ a b)) (add 2 2)" ++ "\nShould return 6")
     evalAll [DefineAlt ["add", "a", "b"] (Call [SymbolAst "*", SymbolAst "a", SymbolAst "b"]), Call [SymbolAst "mul", IntegerAst 3, IntegerAst 2]] env
+
+    putStrLn ("\n\n(define (fact x) (if (eq? x 1) 1 (* x (fact (- x 1))))) (fact 5)" ++ "\nShould return 120")
+    evalAll [DefineAlt ["fact", "x"] (Call [SymbolAst "if", Call [SymbolAst "eq?", SymbolAst "x", IntegerAst 1], IntegerAst 1, Call [SymbolAst "*", SymbolAst "x", Call [SymbolAst "fact", Call [SymbolAst "-", SymbolAst "x", IntegerAst 1]]]]), Call [SymbolAst "fact", IntegerAst 5]] env
+
+    --test fibonacci recursive
+    putStrLn ("\n\n(define (fib x) (if (eq? x 0) 0 (if (eq? x 1) 1 (+ (fib (- x 1)) (fib (- x 2)))))) (fib 5)" ++ "\nShould return 5")
+    evalAll [DefineAlt ["fib", "x"] (Call [SymbolAst "if", Call [SymbolAst "eq?", SymbolAst "x", IntegerAst 0], IntegerAst 0, Call [SymbolAst "if", Call [SymbolAst "eq?", SymbolAst "x", IntegerAst 1], IntegerAst 1, Call [SymbolAst "+", Call [SymbolAst "fib", Call [SymbolAst "-", SymbolAst "x", IntegerAst 1]], Call [SymbolAst "fib", Call [SymbolAst "-", SymbolAst "x", IntegerAst 2]]]]]), Call [SymbolAst "fib", IntegerAst 5]] env
