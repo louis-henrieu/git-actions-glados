@@ -1,29 +1,30 @@
 module Define (
+    replaceInEnv,
     defineFunc,
     isInEnv,
 ) where
 
-    import Info
-    import Env
+import Info
+import Env
 
-    isInEnv :: String -> [(String, Ast)] -> Bool
-    isInEnv _ [] = False
-    isInEnv name ((key, _):xs) = if name == key then True else isInEnv name xs
+isInEnv :: String -> [(String, Ast)] -> Bool
+isInEnv _ [] = False
+isInEnv name ((key, _):xs) = if name == key then True else isInEnv name xs
 
-    replaceInEnv :: String -> Ast -> [(String, Ast)] -> [(String, Ast)]
-    replaceInEnv _ _ [] = []
-    replaceInEnv name value ((key, ast):xs) = 
-        if name == key 
-            then 
-                (key, value) : xs 
-            else 
-                (key, ast) : replaceInEnv name value xs
+replaceInEnv :: String -> Ast -> [(String, Ast)] -> [(String, Ast)]
+replaceInEnv _ _ [] = []
+replaceInEnv name value ((key, ast):xs) = 
+    if name == key 
+        then 
+            (key, value) : xs 
+        else 
+            (key, ast) : replaceInEnv name value xs
 
-    defineFunc :: String -> Ast -> Env ->  Either String (Ast, Env)
-    defineFunc name value env = case value of
-        (Lambda x y) -> case isInEnv name env of
-            False -> Right (Empty, (name, ArgsLambda (x, y)):env)
-            True -> Right (Empty, replaceInEnv name (ArgsLambda (x, y)) env)
+defineFunc :: String -> Ast -> Env ->  Either String (Ast, Env)
+defineFunc name value env = case value of
+    (Lambda x y) -> case isInEnv name env of
+        False -> Right (Empty, (name, ArgsLambda (x, y)):env)
+        True -> Right (Empty, replaceInEnv name (ArgsLambda (x, y)) env)
 
         (SymbolAst x) -> case getValueEnv env x of
             Left err -> Left err

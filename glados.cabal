@@ -33,6 +33,7 @@ library
       Env
       Info
       Keywords
+      Lambda
       Lib
       Parser
   other-modules:
@@ -60,7 +61,13 @@ test-suite glados-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Tbasicfunc
+      Tcpt
+      Tdefine
+      Tenv
       Test1
+      Tinfo
+      Tkeywords
       Paths_glados
   hs-source-dirs:
       test
