@@ -6,11 +6,13 @@ module Info where
     import Text.Show.Functions
 
     data Ast = Define String (Ast)
+        | DefineAlt [String] Ast
         | IntegerAst Int
         | FloatAst Float
         | SymbolAst String
-        -- | Function [Ast] -> Either String Ast
         | Lambda [String] Ast
+        -- | Function [Ast] -> Either String Ast
+        | ArgsLambda ([String], Ast)
         | If Ast Ast Ast
         | Builtin ([Ast] -> Env -> Either String Ast)
         | Call [Ast]
@@ -22,7 +24,7 @@ module Info where
 
     --getValueEnv :: String -> Env -> Either String Ast
     getValueEnv :: Env -> String -> Either String Ast
-    getValueEnv [] key = Left ("Symbole : \'" ++ key ++ "\' not found")
+    getValueEnv [] key = Left ("Symbol \'" ++ key ++ "\' not found")
     getValueEnv env key = if key == fst (head env)
         then Right (snd (head env))
         else getValueEnv (tail env) key
@@ -35,6 +37,9 @@ module Info where
         SymbolAst s -> case getValueEnv env s of
             Right x -> x : convertArgs args env
             Left err -> Empty : convertArgs args env
+        -- Call x -> case evalAst (Call x) env of
+        --     Right x -> x : convertArgs args env
+        --     Left err -> Empty : convertArgs args env
         _ -> arg : convertArgs args env
 
     --checkIfEmpty :: [Ast] -> Bool
