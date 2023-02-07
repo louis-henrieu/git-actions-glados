@@ -44,15 +44,17 @@ parseWord s = case s of
     '(' : s -> []
     ')' : s -> []
     ' ' : s -> []
+    '\n': s -> []
     x : s -> x : (parseWord s)
 
 goToNextWord :: String -> String -- get to the next word in the list
 goToNextWord [] = ""
 goToNextWord s = case s of
     ' ':s -> s
-    '(':s -> s
-    ')':s -> s
-    x:s -> goToNextWord s
+    '\n':s -> s
+    '(':s -> '(':s
+    ')':s -> ')':s
+    x:s -> goToNextWord s 
 
 goToClose :: String -> Int -> String -- get to the end of the as start parenthesis
 goToClose [] _ = ""
@@ -67,7 +69,11 @@ parseCpt s = case s of
     [] -> []
     '(' : s -> (List (parseCpt s)) : parseCpt (goToClose (s) 0)
     ')' : s -> []
+    ' ': s -> (parseCpt s)
+    '\n': s -> (parseCpt s)
     x:s -> (parseType (parseWord (x:s) )) : parseCpt (goToNextWord s)
+
+--affirmCPT :: [Maybe Cpt] -> Cpt
 
 main :: IO()
 main = do
@@ -76,5 +82,7 @@ main = do
         "quit" -> return ()
         _ -> do
             let env = []
-            let (tab_ast:tab_ast') = listCptToListAST (parseCpt line)
-            print (evalAST tab_ast)
+            let cpt = List (parseCpt line)
+            print(printTree (cpt))
+            --let (tab_ast:tab_ast') = listCptToListAST (parseCpt line)
+            --print (evalAST tab_ast)
