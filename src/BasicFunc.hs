@@ -1,9 +1,12 @@
 module BasicFunc (
+    checkFloatInt,
     preAdd,
     preSub,
     preMul,
+    checkZero,
     preDiv,
     preMod,
+    fact,
 ) where
 
     import Info

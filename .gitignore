@@ -2,6 +2,7 @@
 .vscode/
 glads/
 *~
+.github
 
 # stack
 dist-newstyle/

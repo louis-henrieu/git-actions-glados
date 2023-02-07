@@ -25,15 +25,18 @@ debug:
 
 clean:
 				stack clean
+				$(RM) src/*.hi src/*.o
 
 flcean:			clean
+				$(RM) test/coverage
 				$(RM) $(NAME)
 
 re:				flcean all
 
 tests_run:
-#				stack test --coverage
+				stack test --coverage
 				stack hpc report --all --destdir test/coverage
+#				microsoft-edge ./test/coverage/hpc_index.html
 
 func_test:
 				cp -f ./test/$(FT_NAME) ./
