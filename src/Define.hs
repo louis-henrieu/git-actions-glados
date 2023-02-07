@@ -25,12 +25,11 @@ defineFunc name value env = case value of
     (Lambda x y) -> case isInEnv name env of
         False -> Right (Empty, (name, ArgsLambda (x, y)):env)
         True -> Right (Empty, replaceInEnv name (ArgsLambda (x, y)) env)
-
-        (SymbolAst x) -> case getValueEnv env x of
+    (SymbolAst x) -> case getValueEnv env x of
             Left err -> Left err
             Right ast -> case isInEnv name env of
                 False -> Right (Empty, (name, ast):env)
                 True -> Right (Empty, replaceInEnv name ast env)
-        _ -> case isInEnv name env of
+    _ -> case isInEnv name env of
             False -> Right (Empty, (name, value):env)
             True -> Right (Empty, replaceInEnv name value env)

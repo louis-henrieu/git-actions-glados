@@ -73,10 +73,10 @@ module Ast where
         SymbolAst s -> case getValueEnv env s of
             Right x -> x : convertArgs args env
             Left err -> Empty : convertArgs args env
-        Call x -> case evalAst (Call x) env of
-            Right x -> case fst x of
-                Empty -> Empty : convertArgs args env
-                _ -> fst x : convertArgs args env
+        Call x -> case preEvalAst (Call x) env of
+            Right x -> case evalAst x env of
+                Right (x, _) -> x : convertArgs args env
+                Left err -> error ("Error in convertArgs: " ++ err ++ "\n args are : " ++ (show (arg:args)) ++ "\n env is : " ++ show env)
             Left err -> Empty : convertArgs args env
         _ -> arg : convertArgs args env
 
@@ -158,7 +158,7 @@ module Ast where
         Right res -> case res of
             ArgsLambda (x, y) -> lambdaFunc x y xs env
             Builtin f -> case f (convertArgs xs env) env of
-                Left err -> Left ("Error in builtin function " ++ x ++ " : " ++ err ++ "\n\n env is : " ++ show env)
+                Left err -> Left ("Error in builtin function " ++ x ++ " : " ++ err)
                 Right ast -> Right (ast, env)
             _ -> Left (x ++ " is not a function")
     evalAst (Lambda x y) env = Right(SymbolAst "#<procedure>", env)
