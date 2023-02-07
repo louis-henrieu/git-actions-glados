@@ -31,6 +31,7 @@ library
       Env
       Info
       Keywords
+      Lambda
       Lib
       Temp
   other-modules:

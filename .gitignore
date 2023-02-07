@@ -20,3 +20,6 @@ coverage/
 *.hi
 *.o
 glados
+test.txt
+*.c
+data
