@@ -15,7 +15,8 @@ testAst = describe "\nTest all functions of Ast file" $ do
     testCheckOnlySymbols
     testParsingDefine
     testParsingList
-    --testConvertArgs
+    testConvertArgs
+    testEvalAst
 
 testCheckOnlySymbols :: Spec
 testCheckOnlySymbols = describe "Test checkOnlySymbols function" $ do
@@ -116,25 +117,85 @@ testParsingList = describe "Test parsingList function" $ do
         let rest = show test
         rest `shouldBe` "Right (Call [IntegerAst 10,IntegerAst 20,IntegerAst 30])"
 
---testConvertArgs :: Spec
---testConvertArgs = describe "Test convertArgs function" $ do
---    let env = [
---        ("+", (Builtin preAdd)),
---        ("-", (Builtin preSub)),
---        ("*", (Builtin preMul)),
---        ("/", (Builtin preDiv)),
---        ("mod", (Builtin preMod)),
---        ("eq?", (Builtin preEqFunc))
---        ]
---    it "Simple Symbol" $ do
---        let test = convertArgs [SymbolAst "a"] env
---        let rest = show test
---        rest `shouldBe` "<function>"
---    it "Simple Number" $ do
---        let test = convertArgs [IntegerAst 10] env
---        let rest = show test
---        rest `shouldBe` "<function>"
---    it "Simple NumberFloat" $ do
---        let test = convertArgs [FloatAst 10.2] env
---        let rest = show test
---        rest `shouldBe` "<function>"
+testConvertArgs :: Spec
+testConvertArgs = describe "\t-- convertArgs --" $ do
+    it "Simple Symbol no env" $ do
+        let test = convertArgs [SymbolAst "a"] []
+        let rest = show test
+        rest `shouldBe` "[Empty]"
+    it "Simple Number no env" $ do
+        let test = convertArgs [IntegerAst 10] []
+        let rest = show test
+        rest `shouldBe` "[IntegerAst 10]"
+    it "Simple NumberFloat no env" $ do
+        let test = convertArgs [FloatAst 10.2]  []
+        let rest = show test
+        rest `shouldBe` "[FloatAst 10.2]"
+    it "Simple Symbol with env" $ do
+        let test = convertArgs [SymbolAst "a"] [("apit", (IntegerAst 5)), ("apit2", (IntegerAst 10))]
+        let rest = show test
+        rest `shouldBe` "[Empty]"
+    it "Simple Number with env" $ do
+        let test = convertArgs [IntegerAst 10] [("apit", (IntegerAst 5)), ("apit2", (IntegerAst 10))]
+        let rest = show test
+        rest `shouldBe` "[IntegerAst 10]"
+    it "Simple NumberFloat with env" $ do
+        let test = convertArgs [FloatAst 10.2] [("apit", (IntegerAst 5)), ("apit2", (IntegerAst 10))]
+        let rest = show test
+        rest `shouldBe` "[FloatAst 10.2]"
+    it "Get env value" $ do
+        let test = convertArgs [SymbolAst "apit"] [("apit", (IntegerAst 5)), ("apit2", (IntegerAst 10))]
+        let rest = show test
+        rest `shouldBe` "[IntegerAst 5]"
+    --it "Call with env" $ do
+    --    let test = convertArgs [Call [SymbolAst "apit", FloatAst 45.3, FloatAst 29.3]] [("apit", (IntegerAst 5)), ("apit2", (IntegerAst 10))]
+    --    let rest = show test
+    --    rest `shouldBe` "[Call [Empty,Empty,Empty]]"
+    --it "Call with env" $ do
+    --    let test = convertArgs [Call [SymbolAst "a", SymbolAst "b", SymbolAst "c"]] [("apit", (IntegerAst 5)), ("apit2", (IntegerAst 10))]
+    --    let rest = show test
+    --    rest `shouldBe` "[Call [Empty,Empty,Empty]]"
+    --it "Call with env and symbol" $ do
+    --    let test = convertArgs [Call [SymbolAst "a", SymbolAst "b", SymbolAst "c"]] [("apit", (IntegerAst 5)), ("apit2", (IntegerAst 10)), ("a", (IntegerAst 15))]
+    --    let rest = show test
+    --    rest `shouldBe` "[Call [IntegerAst 15,Empty,Empty]]"
+    --it "get call env" $ do
+    --    let test = convertArgs [Call [SymbolAst "a", SymbolAst "b", SymbolAst "c"]] [("apit", (IntegerAst 5)), ("apit2", (IntegerAst 10)), ("a", (Call [SymbolAst "a", SymbolAst "b", SymbolAst "c"]))]
+    --    let rest = show test
+    --    rest `shouldBe` "[Call [Call [Empty,Empty,Empty],Empty,Empty]]"
+
+
+testEvalAst :: Spec
+testEvalAst = describe "\t-- evalAst --" $ do
+    it "Simple Symbol no env" $ do
+        let test = evalAst (SymbolAst "a") []
+        let rest = show test
+        rest `shouldBe` "Right (SymbolAst \"a\",[])"
+    it "Simple Number no env" $ do
+        let test = evalAst (IntegerAst 10) []
+        let rest = show test
+        rest `shouldBe` "Right (IntegerAst 10,[])"
+    it "Simple NumberFloat no env" $ do
+        let test = evalAst (FloatAst 10.2)  []
+        let rest = show test
+        rest `shouldBe` "Right (FloatAst 10.2,[])"
+    it "Simple Symbol with env" $ do
+        let test = evalAst (SymbolAst "a") [("apit", (IntegerAst 5)), ("apit2", (IntegerAst 10))]
+        let rest = show test
+        rest `shouldBe` "Right (SymbolAst \"a\",[(\"apit\",IntegerAst 5),(\"apit2\",IntegerAst 10)])"
+    it "Simple Number with env" $ do
+        let test = evalAst (IntegerAst 10) [("apit", (IntegerAst 5)), ("apit2", (IntegerAst 10))]
+        let rest = show test
+        rest `shouldBe` "Right (IntegerAst 10,[(\"apit\",IntegerAst 5),(\"apit2\",IntegerAst 10)])"
+    it "Simple NumberFloat with env" $ do
+        let test = evalAst (FloatAst 10.2) [("apit", (IntegerAst 5)), ("apit2", (IntegerAst 10))]
+        let rest = show test
+        rest `shouldBe` "Right (FloatAst 10.2,[(\"apit\",IntegerAst 5),(\"apit2\",IntegerAst 10)])"
+    it "Get env value" $ do
+        let test = evalAst (SymbolAst "apit") [("apit", (IntegerAst 5)), ("apit2", (IntegerAst 10))]
+        let rest = show test
+        rest `shouldBe` "Right (SymbolAst \"apit\",[(\"apit\",IntegerAst 5),(\"apit2\",IntegerAst 10)])"
+    it "Call with env" $ do
+        let test = evalAst (Call [SymbolAst "apit", FloatAst 45.3, FloatAst 29.3]) [("apit", (IntegerAst 5)), ("apit2", (IntegerAst 10))]
+        let rest = show test
+        rest `shouldBe` "Left \"apit is not a function\""
