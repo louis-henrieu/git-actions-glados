@@ -32,6 +32,8 @@ jobs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
+    - name: Install stack
+      run: curl -sSL https://get.haskellstack.org/ | sh
     - name: Install dependencies
       run: stack update
     - name: Build
