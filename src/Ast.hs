@@ -65,6 +65,7 @@ module Ast where
     cptToAst (Number n) = Right (IntegerAst n)
     cptToAst (Symbol s) = Right (SymbolAst s)
     cptToAst (List x) = parsingList (List x)
+
     --convertArgs :: [Ast] -> Env -> [Ast]
     -- convert the symbol to the value
     convertArgs :: [Ast] -> Env -> [Ast]
@@ -73,7 +74,7 @@ module Ast where
         SymbolAst s -> case getValueEnv env s of
             Right x -> x : convertArgs args env
             Left err -> Empty : convertArgs args env
-        Call x -> case preEvalAst (Call x) env of
+        Call x -> case preEvalAst (Call (convertArgs x env)) env of
             Right x -> case evalAst x env of
                 Right (x, _) -> x : convertArgs args env
                 Left err -> error ("Error in convertArgs: " ++ err ++ "\n args are : " ++ (show (arg:args)) ++ "\n env is : " ++ show env)
@@ -132,7 +133,7 @@ module Ast where
     evalAst :: Ast -> Env -> Either String (Ast, Env)
     evalAst (SymbolAst x) env = Right (SymbolAst x, env)
     evalAst (Define d x) env = defineFunc d x env
-    evalAst (DefineAlt (n:args) ast) env = case isInEnv n env of
+    evalAst (DefineAlt (n : args) ast) env = case isInEnv n env of
         True -> Right (Empty, (replaceEnv n (ArgsLambda (args, ast)) env []) )
         False -> Right (Empty, (n, ArgsLambda (args, ast)):env)
     evalAst (IntegerAst i) env = Right (IntegerAst i, env)
@@ -153,7 +154,7 @@ module Ast where
                         Left err -> Left err
                         Right (ast, env3) -> Right (ast, env3)
                 _ -> Left "Error in if"
-    evalAst (Call(SymbolAst x:xs)) env = case getValueEnv env x of
+    evalAst (Call(SymbolAst x : xs)) env = case getValueEnv env x of
         Left err -> Left err
         Right res -> case res of
             ArgsLambda (x, y) -> lambdaFunc x y xs env
@@ -162,4 +163,9 @@ module Ast where
                 Right ast -> Right (ast, env)
             _ -> Left (x ++ " is not a function")
     evalAst (Lambda x y) env = Right(SymbolAst "#<procedure>", env)
-    evalAst (Call((Lambda x y):z)) env = lambdaFunc x y z env
+    evalAst (Call ((Lambda x y) : z)) env = lambdaFunc x y z env
+    evalAst (Call (Builtin x : args)) env = case x args env of
+        Left err -> error (show err)
+        Right res -> Right (res, env)
+    evalAst (Call (ArgsLambda (x ,y) : z)) env = lambdaFunc x y z env
+    evalAst ast _ = error("The ast is : " ++ show(ast))
