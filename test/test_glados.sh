@@ -50,3 +50,8 @@ test_result "test/scm_exemple/builtins3.scm" "#f" 0 "\t-Builtins boolean false-\
 echo -e "\E[0;36m \t\t\t  ~ Other exemples ~\e\e[0m"
 test_result "test/scm_exemple/superior.scm" "#t" 0 "\t-Superior function comparison-\t\t\t\t\t"
 test_result "test/scm_exemple/factorial.scm" "3628800" 0 "\t-Factiorial function recursive-\t\t\t\t\t"
+
+echo -e "\n\E[0;35m\e[1m \t\t\tBASIC TEST \e\e[0m"
+echo -e "\E[0;36m \t\t\t  ~ Basin function ~\e\e[0m"
+test_result "test/scm_exemple/defense1.scm" "42" 0 "\t-Define lambda incrementation-\t\t\t\t\t"
+test_result "test/scm_exemple/defense2.scm" "16" 0 "\t-Define square function-\t\t\t\t\t"
