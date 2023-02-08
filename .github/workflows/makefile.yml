@@ -14,8 +14,10 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+    - name: Create missing file partial
+      run: sudo mkdir -p /var/cache/apt/archives/partial
     - name: Install apt
-      run: apt-get update
+      run: sudo apt-get update --fix-missing
     - name: Installations for compilation stack
       run: curl -sSL https://get.haskellstack.org/ | sh
     - name: Install dependencies
