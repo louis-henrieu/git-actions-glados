@@ -15,6 +15,7 @@ testAst = describe "\nTest all functions of Ast file" $ do
     testCheckOnlySymbols
     testParsingDefine
     testParsingList
+    --testConvertArgs
 
 testCheckOnlySymbols :: Spec
 testCheckOnlySymbols = describe "Test checkOnlySymbols function" $ do
@@ -94,4 +95,46 @@ testParsingList = describe "Test parsingList function" $ do
         let test = parsingList (List [Symbol "a", Symbol "b", List [Symbol "c", Symbol "d"], Symbol "e", List [Symbol "f", Symbol "g"], Symbol "h"])
         let rest = show test
         rest `shouldBe` "Right (Call [SymbolAst \"a\",SymbolAst \"b\",Call [SymbolAst \"c\",SymbolAst \"d\"],SymbolAst \"e\",Call [SymbolAst \"f\",SymbolAst \"g\"],SymbolAst \"h\"])"
-        
+    it "If condition" $ do
+        let test = parsingList (List [Symbol "if", Symbol "a", Symbol "b", Symbol "c"])
+        let rest = show test
+        rest `shouldBe` "Right (If (SymbolAst \"a\") (SymbolAst \"b\") (SymbolAst \"c\"))"
+    it "If with no symbol no argument" $ do
+        let test = parsingList (List [Symbol "if"])
+        let rest = show test
+        rest `shouldBe` "Right (Call [SymbolAst \"if\"])"
+    it "If with no symbol one argument" $ do
+        let test = parsingList (List [Symbol "if", Symbol "a"])
+        let rest = show test
+        rest `shouldBe` "Right (Call [SymbolAst \"if\",SymbolAst \"a\"])"
+    it "If with no symbol two arguements" $ do
+        let test = parsingList (List [Symbol "if", Symbol "a", Symbol "b"])
+        let rest = show test
+        rest `shouldBe` "Right (Call [SymbolAst \"if\",SymbolAst \"a\",SymbolAst \"b\"])"
+    it "Number list parameter" $ do
+        let test = parsingList (List [Number 10, Number 20, Number 30])
+        let rest = show test
+        rest `shouldBe` "Right (Call [IntegerAst 10,IntegerAst 20,IntegerAst 30])"
+
+--testConvertArgs :: Spec
+--testConvertArgs = describe "Test convertArgs function" $ do
+--    let env = [
+--        ("+", (Builtin preAdd)),
+--        ("-", (Builtin preSub)),
+--        ("*", (Builtin preMul)),
+--        ("/", (Builtin preDiv)),
+--        ("mod", (Builtin preMod)),
+--        ("eq?", (Builtin preEqFunc))
+--        ]
+--    it "Simple Symbol" $ do
+--        let test = convertArgs [SymbolAst "a"] env
+--        let rest = show test
+--        rest `shouldBe` "<function>"
+--    it "Simple Number" $ do
+--        let test = convertArgs [IntegerAst 10] env
+--        let rest = show test
+--        rest `shouldBe` "<function>"
+--    it "Simple NumberFloat" $ do
+--        let test = convertArgs [FloatAst 10.2] env
+--        let rest = show test
+--        rest `shouldBe` "<function>"
