@@ -1,5 +1,6 @@
 module Keywords (
     preEqFunc,
+    eqFunc
 ) where
     import Info
     import Data.Eq

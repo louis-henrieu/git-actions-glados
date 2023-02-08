@@ -6,6 +6,9 @@ module BasicFunc (
     preMod,
     preInf,
     preSup,
+    checkZero,
+    checkFloatInt,
+    fact
 ) where
 
     import Info

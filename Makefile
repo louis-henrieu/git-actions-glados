@@ -33,14 +33,14 @@ fclean:			clean
 				$(RM) test/coverage
 				$(RM) $(NAME) $(CONF_NAME)
 
-re:				flcean all
+re:				fclean all
 
 tests_run:
 				stack test --coverage
 				stack hpc report --all --destdir test/coverage
 #				microsoft-edge ./test/coverage/hpc_index.html
 
-func_test:
+func_test:		re
 				cp -f ./test/$(FT_NAME) ./
 				chmod +x $(FT_NAME)
 				./$(FT_NAME)
