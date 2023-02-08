@@ -28,7 +28,7 @@ testEnvStorage = describe "-- updateEnv --" $ do
     it "basic storage" $ do
         let test = envStorage
         let rest = show test
-        rest `shouldBe` "[(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>)]"
+        rest `shouldBe` "[(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>),(\"<\",Builtin <function>),(\">\",Builtin <function>)]"
 
 testUpdateEnv :: Spec
 testUpdateEnv = describe "-- updateEnv --" $ do
@@ -36,7 +36,7 @@ testUpdateEnv = describe "-- updateEnv --" $ do
         let tEmpty = envStorage
         let test = updateEnv "apit" (IntegerAst 5) tEmpty
         let rest = show test
-        rest `shouldBe` "[(\"apit\",IntegerAst 5),(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>)]"
+        rest `shouldBe` "[(\"apit\",IntegerAst 5),(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>),(\"<\",Builtin <function>),(\">\",Builtin <function>)]"
     it "update storage" $ do
         let tEmpty = envStorage
         let test = updateEnv "apit" (IntegerAst 5) [("apit", (IntegerAst 10))]
@@ -49,33 +49,33 @@ testReplaceEnv = describe "-- replaceEnv --" $ do
         let env = envStorage
         let test = replaceEnv "apit" (IntegerAst 5) [] env 
         let rest = show test
-        rest `shouldBe` "[(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>)]"
+        rest `shouldBe` "[(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>),(\"<\",Builtin <function>),(\">\",Builtin <function>)]"
     it "replace storage" $ do
         let env = envStorage
         let test = replaceEnv "apit" (IntegerAst 5) [("apit", (IntegerAst 10))] env 
         let rest = show test
-        rest `shouldBe`  "[(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>),(\"apit\",IntegerAst 5)]"
+        rest `shouldBe`  "[(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>),(\"<\",Builtin <function>),(\">\",Builtin <function>),(\"apit\",IntegerAst 5)]"
     it "replace storage" $ do
         let env = envStorage
         let test = replaceEnv "apit" (IntegerAst 5) [("apit2", (IntegerAst 10))] env 
         let rest = show test
-        rest `shouldBe` "[(\"apit2\",IntegerAst 10),(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>)]"
+        rest `shouldBe` "[(\"apit2\",IntegerAst 10),(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>),(\"<\",Builtin <function>),(\">\",Builtin <function>)]"
     it "replace storage" $ do
         let env = envStorage
         let test = replaceEnv "apit" (IntegerAst 5) [("apit2", (IntegerAst 10)), ("apit3", (IntegerAst 15))] env 
         let rest = show test
-        rest `shouldBe` "[(\"apit3\",IntegerAst 15),(\"apit2\",IntegerAst 10),(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>)]"
+        rest `shouldBe` "[(\"apit3\",IntegerAst 15),(\"apit2\",IntegerAst 10),(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>),(\"<\",Builtin <function>),(\">\",Builtin <function>)]"
 
 testUpdateAllEnv :: Spec
 testUpdateAllEnv = describe "-- updateAllEnv --" $ do
     it "empty" $ do
         let test = updateAllEnv [] [] envStorage
         let rest = show test
-        rest `shouldBe` "[(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>)]"
+        rest `shouldBe` "[(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>),(\"<\",Builtin <function>),(\">\",Builtin <function>)]"
     it "new env" $ do
         let test = updateAllEnv ["apit", "apit2"] [(IntegerAst 5), (IntegerAst 10)] envStorage
         let rest = show test
-        rest `shouldBe` "[(\"apit2\",IntegerAst 10),(\"apit\",IntegerAst 5),(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>)]"
+        rest `shouldBe` "[(\"apit2\",IntegerAst 10),(\"apit\",IntegerAst 5),(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>),(\"<\",Builtin <function>),(\">\",Builtin <function>)]"
 
 testPrintAllEnv :: Spec
 testPrintAllEnv = describe "-- printAllEnv --" $ do

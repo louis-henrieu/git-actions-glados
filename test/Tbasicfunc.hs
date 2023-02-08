@@ -176,19 +176,19 @@ testPreAdd = describe "Test preAdd function" $ do
     it "Test preAdd with two elements and one symbol int" $ do
         let test = preAdd [IntegerAst 1, SymbolAst "a"] [("a", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Right (IntegerAst 3)"
+        rest `shouldBe` "Left \"The arg 'x' is not a number\""
     it "Test preAdd with two elements and one symbol float" $ do
         let test = preAdd [FloatAst 1.01, SymbolAst "a"] [("a", FloatAst 2.99)]
         let rest = show test
-        rest `shouldBe` "Right (FloatAst 4.0)"
+        rest `shouldBe` "Left \"The arg 'x' is not a number\""
     it "Test preAdd with two elements and one symbol" $ do
         let test = preAdd [FloatAst (-1.01), SymbolAst "a"] [("a", FloatAst 0.01)]
         let rest = show test
-        rest `shouldBe` "Right (FloatAst (-1.0))"
+        rest `shouldBe` "Left \"The arg 'x' is not a number\""
     it "Test preAdd with two elements and one symbol" $ do
         let test = preAdd [IntegerAst 1, SymbolAst "a"] [("a", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Right (IntegerAst 1)"
+        rest `shouldBe` "Left \"The arg 'x' is not a number\""
     it "Test preAdd with two elements and one symbol" $ do
         let test = preAdd [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b")]
         let rest = show test
@@ -208,7 +208,7 @@ testPreAdd = describe "Test preAdd function" $ do
     it "Test symbol does not exist" $ do
         let test = preAdd [IntegerAst 1, SymbolAst "a"] [("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"There is at least a symbol that doesn't exist\""
+        rest `shouldBe` "Left \"The arg 'x' is not a number\""
 
 testPreSub :: Spec
 testPreSub = describe "Test preSub function" $ do
@@ -231,15 +231,15 @@ testPreSub = describe "Test preSub function" $ do
     it "Test preSub with two elements and one symbol int" $ do
         let test = preSub [IntegerAst 1, SymbolAst "a"] [("a", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Right (IntegerAst (-1))"
+        rest `shouldBe` "Left \"The arg 'x' is not a number\""
     it "Test preSub with two elements and one symbol float" $ do
         let test = preSub [FloatAst 1.01, SymbolAst "a"] [("a", FloatAst 2.99)]
         let rest = show test
-        rest `shouldBe` "Right (FloatAst (-1.98))"
+        rest `shouldBe` "Left \"The arg 'x' is not a number\""
     it "Test preSub with two elements and one symbol" $ do
         let test = preSub [FloatAst (-1.01), SymbolAst "a"] [("a", FloatAst 0.01)]
         let rest = show test
-        rest `shouldBe` "Right (FloatAst (-1.02))"
+        rest `shouldBe` "Left \"The arg 'x' is not a number\""
     it "Test preSub with two elements and one symbol" $ do
         let test = preSub [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b")]
         let rest = show test
@@ -259,7 +259,7 @@ testPreSub = describe "Test preSub function" $ do
     it "Test symbol does not exist" $ do
         let test = preSub [IntegerAst 1, SymbolAst "a"] [("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"There is at least a symbol that doesn't exist\""
+        rest `shouldBe` "Left \"The arg 'x' is not a number\""
 
 testPreMul :: Spec
 testPreMul = describe "Test preMul function" $ do
@@ -282,15 +282,15 @@ testPreMul = describe "Test preMul function" $ do
     it "Test preMul with two elements and one symbol int" $ do
         let test = preMul [IntegerAst 1, SymbolAst "a"] [("a", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Right (IntegerAst 2)"
+        rest `shouldBe` "Left \"The arg 'x' is not a number\""
     it "Test preMul with two elements and one symbol float" $ do
         let test = preMul [FloatAst 1.01, SymbolAst "a"] [("a", FloatAst 2.99)]
         let rest = show test
-        rest `shouldBe` "Right (FloatAst 3.0199)"
+        rest `shouldBe` "Left \"The arg 'x' is not a number\""
     it "Test preMul with two elements and one symbol" $ do
         let test = preMul [FloatAst (-1.01), SymbolAst "a"] [("a", FloatAst 0.01)]
         let rest = show test
-        rest `shouldBe` "Right (FloatAst (-1.01e-2))"
+        rest `shouldBe` "Left \"The arg 'x' is not a number\""
     it "Test preMul with two elements and one symbol" $ do
         let test = preMul [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b")]
         let rest = show test
@@ -311,7 +311,7 @@ testPreMul = describe "Test preMul function" $ do
     it "Test preMul with two elements and one symbol" $ do
         let test = preMul [FloatAst 1.0, SymbolAst "a"] [("a", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Right (FloatAst 2.0)"
+        rest `shouldBe` "Left \"The arg 'x' is not a number\""
     it "Test preMul with two elements and one symbol" $ do
         let test = preMul [FloatAst 1.0, SymbolAst "a"] [("a", SymbolAst "b")]
         let rest = show test
@@ -323,7 +323,7 @@ testPreMul = describe "Test preMul function" $ do
     it "Test symbol does not exist" $ do
         let test = preMul [IntegerAst 1, SymbolAst "a"] [("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"There is at least a symbol that doesn't exist\""
+        rest `shouldBe` "Left \"The arg 'x' is not a number\""
 
 
 testCheckZero :: Spec
@@ -331,7 +331,7 @@ testCheckZero = describe "Test checkZero function" $ do
     it "Test checkZero with zero" $ do
         let test = checkZero (IntegerAst 0) [("a", IntegerAst 1)]
         let rest = show test
-        rest `shouldBe` "Left \"Second argument is null\""
+        rest `shouldBe` "Left \"Second argument is not allowed to be a 0\""
     it "Test checkZero with positive num" $ do
         let test = checkZero (IntegerAst 1) [("a", IntegerAst 1)]
         let rest = show test
@@ -343,7 +343,7 @@ testCheckZero = describe "Test checkZero function" $ do
     it "Test checkZero with float zero" $ do
         let test = checkZero (FloatAst 0.0) [("a", IntegerAst 1)]
         let rest = show test
-        rest `shouldBe` "Left \"Second argument is null\""
+        rest `shouldBe` "Left \"Second argument is not allowed to be a 0\""
     it "Test checkZero with float positive num" $ do
         let test = checkZero (FloatAst 1.0) [("a", IntegerAst 1)]
         let rest = show test
@@ -359,7 +359,7 @@ testCheckZero = describe "Test checkZero function" $ do
     it "Test checkZero with symbol 0 int" $ do
         let test = checkZero (SymbolAst "a") [("a", IntegerAst 0)]
         let rest = show test
-        rest `shouldBe` "Left \"Second argument is null\""  
+        rest `shouldBe` "Left \"Second argument is not allowed to be a 0\"" 
     it "Test checkZero with symbol float pos" $ do
         let test = checkZero (SymbolAst "a") [("a", FloatAst 1.0)]
         let rest = show test
@@ -367,7 +367,7 @@ testCheckZero = describe "Test checkZero function" $ do
     it "Test checkZero with symbol float 0" $ do
         let test = checkZero (SymbolAst "a") [("a", FloatAst 0)]
         let rest = show test
-        rest `shouldBe` "Left \"Second argument is null\""
+        rest `shouldBe` "Left \"Second argument is not allowed to be a 0\""
     it "Test checkZero with symbol" $ do
         let test = checkZero (SymbolAst "a") [("a", SymbolAst "b")]
         let rest = show test
@@ -394,11 +394,11 @@ testPreDiv = describe "Test preDiv function" $ do
     it "Test preDiv with two elements and one symbol" $ do
         let test = preDiv [IntegerAst 1, SymbolAst "a"] [("a", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Right (IntegerAst 0)"
+        rest `shouldBe` "Left \"The arg 'x' is not a number\""
     it "Test preDiv with two elements and one symbol" $ do
         let test = preDiv [IntegerAst 1, SymbolAst "a"] [("a", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Right (IntegerAst 1)"
+        rest `shouldBe` "Left \"The arg 'x' is not a number\""
     it "Test preDiv with two elements and one symbol" $ do
         let test = preDiv [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b")]
         let rest = show test
@@ -422,7 +422,7 @@ testPreDiv = describe "Test preDiv function" $ do
     it "Test symbol does not exist" $ do
         let test = preDiv [IntegerAst 1, SymbolAst "a"] [("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"There is at least a symbol that doesn't exist\""
+        rest `shouldBe` "Left \"The arg 'x' is not a number\""
  
 
 testPreMod :: Spec
@@ -446,7 +446,7 @@ testPreMod = describe "Test preMod function" $ do
     it "Test preMod with two elements and one symbol int" $ do
         let test = preMod [IntegerAst 1, SymbolAst "a"] [("a", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Right (IntegerAst 1)"
+        rest `shouldBe` "Left \"Mod function only works with integers\""
     it "Test preMod with two elements and one symbol float" $ do
         let test = preMod [FloatAst 1.01, SymbolAst "a"] [("a", FloatAst 2.99)]
         let rest = show test
@@ -474,7 +474,7 @@ testPreMod = describe "Test preMod function" $ do
     it "Test symbol does not exist" $ do
         let test = preMod [IntegerAst 1, SymbolAst "a"] [("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"There is at least a symbol that doesn't exist\""
+        rest `shouldBe` "Left \"Mod function only works with integers\""
     
 
 testFact :: Spec
