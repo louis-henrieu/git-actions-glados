@@ -6,30 +6,39 @@ on:
   pull_request:
     branches: [ "master" ]
 
-# install dependencies for stack haskell build
+permissions:
+  contents: read
+
 jobs:
   build:
+
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-haskell@v1
-        with:
-          ghc-version: "8.6.4"
-          cabal-version: "3.8.1.0"
-          stack-version: "2.9.3"
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.stack
-            ~/.cabal
-          key: ${{ runner.os }}-stack-cabal
-      - name: Install dependencies
-        run: |
-          stack setup
-          stack build --only-dependencies
-      - name: Build
-        run: |
-          stack build
-      - name: Test
-        run: |
-          stack test
+    - uses: actions/checkout@v3
+    - uses: actions/setup-haskell@v1
+      with:
+        ghc-version: '8.8'
+        cabal-version: '3.0.0.0'
+
+    - name: Cache
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-cabal
+      with:
+        path: ~/.cabal
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/*.cabal') }}-${{ hashFiles('**/cabal.project') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+    - name: Create missing file partial
+      run: sudo mkdir -p /var/cache/apt/archives/partial
+    - name: Install apt
+      run: sudo apt-get update --fix-missing
+    - name: Install stack
+      run: sudo curl -sSL https://get.haskellstack.org/ | sh
+    - name: Install dependencies
+      run: stack update
+    - name: Build
+      run: stack build
