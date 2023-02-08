@@ -15,7 +15,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
     - name: Install apt
-      run: apt-get update
+      run: apt-get update --fix-missing
     - name: Installations for compilation stack
       run: curl -sSL https://get.haskellstack.org/ | sh
     - name: Install dependencies
