@@ -209,6 +209,10 @@ testPreAdd = describe "Test preAdd function" $ do
         let test = preAdd [IntegerAst 1, SymbolAst "a"] [("b", IntegerAst 2)]
         let rest = show test
         rest `shouldBe` "Left \"The arg 'x' is not a number\""
+    it "Test least one symbol does not exist" $ do
+        let test = preAdd [IntegerAst 1] []
+        let rest = show test
+        rest `shouldBe` "Right (IntegerAst 1)"
 
 testPreSub :: Spec
 testPreSub = describe "Test preSub function" $ do

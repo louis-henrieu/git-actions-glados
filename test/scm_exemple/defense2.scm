@@ -1,3 +1,3 @@
-(define (square x)
+(define (sqr x)
     (* x x))
-(square 4)
+(sqr 4)

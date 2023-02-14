@@ -1,4 +1,4 @@
-(define succ
+(define inc
     (lambda (x)
-        (+ x 1))
-(succ 41)
+        (+ x 1)))
+(inc 41)
