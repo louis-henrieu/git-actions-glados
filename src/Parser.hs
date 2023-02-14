@@ -105,23 +105,47 @@ parseSome p =
         Left (x) -> Left ("Error ParseSome")
     )
 
-parseUInt :: Parser Int
-parseUInt =
+--parseUInt :: Parser Int
+--parseUInt =
+--  Parser
+--    ( \s -> case runParser (parseSome (parseAnyChar ['0' .. '9'])) s of
+--        Right (cs, s') -> Right (read cs, s')
+--        Left (x) -> Left ("Error ParseUInt")
+--    )
+
+parseUFloat :: Parser Float
+parseUFloat =
   Parser
     ( \s -> case runParser (parseSome (parseAnyChar ['0' .. '9'])) s of
-        Right (cs, s') -> Right (read cs, s')
-        Left (x) -> Left ("Error ParseUInt")
+        Right (cs, s') -> case runParser (parseChar '.') s' of
+          Right (c, s'') -> case runParser (parseSome (parseAnyChar ['0' .. '9'])) s'' of
+            Right (cs', s''') -> Right (read (cs ++ [c] ++ cs'), s''')
+            Left (x) -> Left ("Error ParseUFloat")
+          Left (x) -> Right (read cs, s')
+        Left (x) -> Left ("Error ParseUFloat")
+    )
+  
+parseFloat :: Parser Float
+parseFloat = 
+  Parser 
+    ( \s  -> case runParser (parseChar '-') s of
+      Right (c, s') -> case runParser (parseUFloat) s' of
+        Right (cs, s'') -> Right (cs * (-1), s'')
+        Left (x) -> Left (x)
+      Left (x) -> case runParser (parseUFloat) s of
+        Right x -> Right x
+        Left (x) -> Left (x)
     )
 
-parseInt :: Parser Int
-parseInt =
-  Parser
-    ( \s -> case runParser (parseChar '-') s of
-        Right (c, s') -> case runParser (parseSome (parseAnyChar ['0' .. '9'])) s' of
-          Right (cs, s'') -> Right (read (c : cs), s'')
-          Left (x) -> Left ("Error ParseInt")
-        Left (x) -> runParser parseUInt s
-    )
+--parseInt :: Parser Int
+--parseInt =
+--  Parser
+--    ( \s -> case runParser (parseChar '-') s of
+--        Right (c, s') -> case runParser (parseSome (parseAnyChar ['0' .. '9'])) s' of
+--          Right (cs, s'') -> Right (read (c : cs), s'')
+--          Left (x) -> Left ("Error ParseInt")
+--        Left (x) -> runParser parseUInt s
+--    )
 
 parseWhiteSpace :: Parser String
 parseWhiteSpace = parseMany (parseChar ' ')
@@ -170,7 +194,7 @@ parseUntilNextSpace (x : xs) = case x of
 
 
 parseString :: Parser String
-parseString = parseSome (parseAnyChar ['a' .. 'z'] <|> parseAnyChar ['A' .. 'Z'] <|> parseAnyChar ['0' .. '9'] <|> parseAnyChar "?!+-*/%=<>#")
+parseString = parseSome (parseAnyChar ['a' .. 'z'] <|>  parseAnyChar ['A' .. 'Z'] <|> parseAnyChar ['0' .. '9'] <|> parseAnyChar "?!+-*/%=<>#")
 
 parseCpt :: Parser Cpt
-parseCpt = (Number <$> parseInt) <|> (List <$> parseList parseCpt) <|> (Symbol <$> parseString)
+parseCpt = (NumberFloat <$> parseFloat) <|> (List <$> parseList parseCpt) <|> (Symbol <$> parseString)

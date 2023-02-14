@@ -5,14 +5,15 @@ module Info where
     import Prelude hiding (lookup)
     import Text.Show.Functions
 
-    data Ast = Define String (Ast)
+    data Ast =  Define String (Ast)
         | DefineAlt [String] Ast
-        | IntegerAst Int
-        | FloatAst Float
+        -- => Lambda String [Ast]
+        | IntegerAst Int 
+        | FloatAst Float -- à rajouter dans parseCpt
         | SymbolAst String
         | Lambda [String] Ast
-        | ArgsLambda ([String], Ast)
         | If Ast Ast Ast
+        | ArgsLambda ([String], Ast)
         | Builtin ([Ast] -> Env -> Either String Ast)
         | Call [Ast]
         | Empty
