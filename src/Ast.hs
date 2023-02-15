@@ -62,6 +62,7 @@ module Ast where
     parsingList _ = Left "Error in cptToAst: this is not a valid list"
 
     cptToAst :: Cpt -> Either String Ast
+    cptToAst (NumberFloat f) = Right (FloatAst f)
     cptToAst (Number n) = Right (IntegerAst n)
     cptToAst (Symbol s) = Right (SymbolAst s)
     cptToAst (List x) = parsingList (List x)
@@ -77,7 +78,7 @@ module Ast where
         Call x -> case preEvalAst (Call (convertArgs x env)) env of
             Right x -> case evalAst x env of
                 Right (x, _) -> x : convertArgs args env
-                Left err -> error ("Error in convertArgs: " ++ err ++ "\n args are : " ++ (show (arg:args)) ++ "\n env is : " ++ show env)
+                Left err -> Empty : convertArgs args env
             Left err -> Empty : convertArgs args env
         _ -> arg : convertArgs args env
 

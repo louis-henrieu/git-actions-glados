@@ -1,10 +1,8 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.35.1.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: 7e574977878537853726cbffe4a1c10cf71957ff373cc3d2a0cafb3445b4e34a
 
 name:           glados
 version:        0.1.0.0
@@ -60,6 +58,7 @@ test-suite glados-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Tast
       Tbasicfunc
       Tcpt
       Tdefine

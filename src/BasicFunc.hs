@@ -7,11 +7,16 @@ module BasicFunc (
     preInf,
     preSup,
     checkZero,
-    checkFloatInt,
-    fact
+    checkFloatInt
 ) where
 
     import Info
+
+    convertIntFloat :: [Ast] -> [Ast]
+    convertIntFloat [] = []
+    convertIntFloat (x:xs) = case x of
+        (IntegerAst x) -> FloatAst (fromIntegral x) : convertIntFloat xs
+        ast -> ast : convertIntFloat xs
 
     checkFloatInt :: [Ast] -> Env -> Either String Bool
     checkFloatInt [] env = Right True
@@ -24,7 +29,7 @@ module BasicFunc (
     preAdd [] env = Left "Add function needs at least two arguments"
     preAdd args env = case checkIfEmpty args of
         True -> case checkFloatInt args env of
-            Right True -> add args env
+            Right True -> add (convertIntFloat(args)) env
             Left err -> Left err
         False -> Left ("There is at least one symbol that isn't defined" ++ show args)
 
@@ -39,7 +44,7 @@ module BasicFunc (
     preSub [] env = Left "Sub function needs at least two arguments"
     preSub args env = case checkIfEmpty args  of
         True -> case checkFloatInt args env of
-            Right True -> sub args env
+            Right True -> sub (convertIntFloat(args)) env
             Left err -> Left err
         False -> Left ("There is at least one symbol that isn't defined" ++ show args)
 
@@ -54,7 +59,7 @@ module BasicFunc (
     preMul [] env = Left "Mul function needs at least two arguments"
     preMul args env = case checkIfEmpty args of
         True -> case checkFloatInt args env of
-            Right True -> mul args env
+            Right True -> mul (convertIntFloat(args)) env
             Left err -> Left err
         False -> Left ("There is at least one symbol that isn't defined" ++ show args)
 
@@ -91,47 +96,47 @@ module BasicFunc (
         2 -> case checkIfEmpty (x:y:xs) of
             True -> case checkFloatInt (x:y:xs) env of
                 Right True -> case checkZero (y) env of
-                    Right ast -> (division ([x, y]) (env))
+                    Right ast -> (division (convertIntFloat[x, y]) (env))
                     Left err -> Left err
                 Left err -> Left err
             False -> Left ("There is at least one symbol that isn't defined" ++ show (x:y:xs))
         _ -> Left "Div function only needs two arguments"
 
     division :: [Ast] -> Env -> Either String Ast
-    division [] env = Right (IntegerAst 1)
-    division list env = Right (IntegerAst (foldl1 div [x | IntegerAst x <- list]))
+    division [] env = Right (FloatAst 1)
+    division list env = Right (FloatAst (foldl1 (/) [x | FloatAst x <- list]))
 
 
-    checkOnlyInt :: [Ast] -> Env -> Bool
-    checkOnlyInt [] env = True
-    checkOnlyInt (x:xs) env = case x of
-        (IntegerAst i) -> checkOnlyInt xs env
-        _ -> False
+    convertFloatInt :: Ast -> Ast
+    convertFloatInt (FloatAst f) = if f == (fromIntegral (round f)) then 
+            IntegerAst (round (f)) 
+        else 
+            Empty
+    convertFloatInt _ = Empty
+
+    convertFloatIntList :: [Ast] -> [Ast]
+    convertFloatIntList [] = []
+    convertFloatIntList (x:xs) = convertFloatInt (x) : convertFloatIntList xs
 
     preMod :: [Ast] -> Env -> Either String Ast
     preMod [] env = Left "Mod function needs at least two arguments"
     preMod (x:y:xs) env = case length (x:y:xs) of
-        2 -> case checkIfEmpty (x:y:xs) of
-            True -> case checkOnlyInt (x:y:xs) env of
-                True -> case checkZero (y) env of
-                    Right ast -> modulo (x:y:xs) env
-                    Left err -> Left err
-                False -> Left "Mod function only works with integers"
-            False -> Left ("There is at least one symbol that isn't defined" ++ show (x:y:xs))
+        2 -> case checkIfEmpty(convertFloatIntList (x:y:xs)) of
+            True -> case (checkZero (convertFloatInt y) env) of
+                Right ast -> modulo (convertFloatIntList(x:y:xs)) env
+                Left err -> Left err
+            False -> Left ("There is at least one parameter that isn't an integer")
         _ -> Left "Mod function only needs two arguments"
 
     modulo :: [Ast] -> Env -> Either String Ast
     modulo (IntegerAst x: IntegerAst y: xs) env = Right (IntegerAst (x `mod` y))
     modulo _ _ = Left "Not a number"
 
-    fact :: Int -> Ast
-    fact x = IntegerAst (product [1..x])
-
     preSup :: [Ast] -> Env -> Either String Ast
     preSup [] env = Left "> operator needs at least two arguments"
     preSup args env = case length args of
         2 -> case checkIfEmpty args of
-            True -> sup args env
+            True -> sup (convertIntFloat(args)) env
             False -> Left ("There is at least one symbol that isn't defined" ++ show args)
         _ -> Left "> operator needs at least two arguments"
 
@@ -140,17 +145,23 @@ module BasicFunc (
     sup (IntegerAst x : IntegerAst y : []) env = case x > y of
         True -> Right (SymbolAst "#t")
         False -> Right (SymbolAst "#f")
+    sup (FloatAst x : FloatAst y : []) env = case x > y of
+        True -> Right (SymbolAst "#t")
+        False -> Right (SymbolAst "#f")
     
     preInf :: [Ast] -> Env -> Either String Ast
     preInf [] env = Left "< operator needs at least two arguments"
     preInf args env = case length args of
         2 -> case checkIfEmpty args of
-            True -> inf args env
+            True -> inf (convertIntFloat(args)) env
             False -> Left ("There is at least one symbol that isn't defined" ++ show args)
         _ -> Left "< operator needs at least two arguments"
     
     inf :: [Ast] -> Env -> Either String Ast
     inf [] env = Left "< operator needs at least two arguments"
     inf (IntegerAst x : IntegerAst y : []) env = case x < y of
+        True -> Right (SymbolAst "#t")
+        False -> Right (SymbolAst "#f")
+    inf (FloatAst x : FloatAst y : []) env = case x < y of
         True -> Right (SymbolAst "#t")
         False -> Right (SymbolAst "#f")
