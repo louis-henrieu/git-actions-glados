@@ -31,7 +31,7 @@ module Env (
     updateEnv symbol ast env = (symbol, ast) : env
 
     replaceEnv :: String -> Ast -> [(String, Ast)] -> [(String, Ast)] -> Env
-    replaceEnv symbol ast [] env = env
+    replaceEnv _ _ [] env = env
     replaceEnv symbol ast ((s, a):xs) new_env = 
         if s == symbol then
             new_env ++ ((s, ast):xs)
@@ -41,6 +41,7 @@ module Env (
     updateAllEnv :: [String] -> [Ast] -> Env -> Env
     updateAllEnv [] [] env = env
     updateAllEnv (s:symbols) (a:asts) env = updateAllEnv symbols asts (updateEnv s a env)
+    updateAllEnv _ _ _ = []
 
     printAllEnv :: Env -> IO ()
     printAllEnv [] = return ()

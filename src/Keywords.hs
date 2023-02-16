@@ -3,10 +3,9 @@ module Keywords (
     eqFunc
 ) where
     import Info
-    import Data.Eq
 
     preEqFunc :: [Ast] -> Env -> Either String Ast
-    preEqFunc [] env = Left "If function needs at least three arguments"
+    preEqFunc [] _ = Left "If function needs at least three arguments"
     preEqFunc args env = case length args of
         2 -> case checkIfEmpty args of
             True -> eqFunc args env
@@ -19,11 +18,11 @@ module Keywords (
     argsToString (x : xs) = show x ++ " || " ++ argsToString xs 
 
     eqFunc :: [Ast] -> Env -> Either String Ast
-    eqFunc [] env = Left "If function needs at least three arguments"
-    eqFunc (IntegerAst x : IntegerAst y : []) env = case x == y of
+    eqFunc [] _ = Left "If function needs at least three arguments"
+    eqFunc (IntegerAst x : IntegerAst y : []) _ = case x == y of
         True -> Right (SymbolAst "#t")
         False -> Right (SymbolAst "#f")
-    eqFunc (FloatAst x : FloatAst y : []) env = case x == y of
+    eqFunc (FloatAst x : FloatAst y : []) _ = case x == y of
         True -> Right (SymbolAst "#t")
         False -> Right (SymbolAst "#f")
-    eqFunc args env = Left ("args are not equal: " ++ (argsToString args))
+    eqFunc args _ = Left ("args are not equal: " ++ (argsToString args))

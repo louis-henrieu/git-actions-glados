@@ -1,7 +1,10 @@
-module Info where
+module Info (
+    Ast(..),
+    Env,
+    getValueEnv,
+    checkIfEmpty
+    ) where
     import Prelude hiding (lookup)
-    import Data.Typeable
-    import Data.Data
     import Prelude hiding (lookup)
     import Text.Show.Functions
 

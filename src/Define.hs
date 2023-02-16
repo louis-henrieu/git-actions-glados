@@ -5,7 +5,6 @@ module Define (
 ) where
 
 import Info
-import Env
 
 isInEnv :: String -> [(String, Ast)] -> Bool
 isInEnv _ [] = False

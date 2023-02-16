@@ -1,4 +1,12 @@
-module Ast where
+module Ast (
+    checkOnlySymbols,
+    parsingDefine,
+    parsingList,
+    cptToAst,
+    convertArgs,
+    preEvalAst,
+    evalAst
+) where
     import Cpt
     import Info
     import Env
@@ -20,7 +28,7 @@ module Ast where
         if (length xs == 1) && (checkOnlySymbols x == Right True) then
             (case cptToAst (head xs) of
                 Left err -> Left ("The ast part of the define is invalid: " ++ err)
-                Right ast -> Right (DefineAlt (map (\ (Symbol s) -> s) x) ast))
+                Right ast -> Right (DefineAlt (map (\ (Symbol symb) -> symb) x) ast))
         else
             Left "The define form is invalid"
     parsingDefine _ = Left "The define form is invalid"
@@ -31,16 +39,13 @@ module Ast where
         if null x then
             case cptToAst (head xs) of
                 Left err -> Left ("The ast part of the lambda is invalid: " ++ err)
-                Right ast -> case ast of
-                    SymbolAst s -> Right (Lambda [] (SymbolAst s))
-                    Call s -> Right (Lambda [] (Call s))
-                    _ -> Left "The lambda form is invalid"
+                Right ast -> Right (Lambda [] ast)
             else if checkOnlySymbols x == Right True then
                 case cptToAst (head xs) of
                     Left err -> Left ("The ast part of the lambda is invalid: " ++ err)
                     Right ast -> case ast of
-                        SymbolAst s -> Right (Lambda (map (\(Symbol s) -> s) x) (SymbolAst s))
-                        Call s -> Right (Lambda (map (\(Symbol s) -> s) x) (Call s))
+                        SymbolAst s -> Right (Lambda (map (\(Symbol symb) -> symb) x) (SymbolAst s))
+                        Call s -> Right (Lambda (map (\(Symbol symb) -> symb) x) (Call s))
                         _ -> Left "The lambda form is invalid"
                 else
                     Left "The lambda form is invalid"
@@ -74,12 +79,12 @@ module Ast where
     convertArgs (arg:args) env = case arg of
         SymbolAst s -> case getValueEnv env s of
             Right x -> x : convertArgs args env
-            Left err -> Empty : convertArgs args env
+            Left _ -> Empty : convertArgs args env
         Call x -> case preEvalAst (Call (convertArgs x env)) env of
-            Right x -> case evalAst x env of
-                Right (x, _) -> x : convertArgs args env
-                Left err -> Empty : convertArgs args env
-            Left err -> Empty : convertArgs args env
+            Right x' -> case evalAst x' env of
+                Right (xs, _) -> xs : convertArgs args env
+                Left _ -> Empty : convertArgs args env
+            Left _ -> Empty : convertArgs args env
         _ -> arg : convertArgs args env
 
     -- cptToAst :: Cpt -> Either String Ast
@@ -111,25 +116,25 @@ module Ast where
         then do
             let env2 = updateAllEnv symbols args env
             case evalAst ast env2 of
-                Right (ast, env3) -> Right (ast, env3)
+                Right (ast2, env3) -> Right (ast2, env3)
                 Left err -> Left err
         else
             Left "Error in lambda - Invalid number of arguments"
 
     preEvalAst :: Ast -> Env -> Either String Ast
-    preEvalAst (Define x y) env = Right (Define x y)
-    preEvalAst (IntegerAst i) env = Right (IntegerAst i)
-    preEvalAst (FloatAst f) env = Right (FloatAst f)
-    preEvalAst (SymbolAst "#t") env = Right (SymbolAst "#t")
-    preEvalAst (SymbolAst "#f") env = Right (SymbolAst "#f")
+    preEvalAst (Define x y) _ = Right (Define x y)
+    preEvalAst (IntegerAst i) _ = Right (IntegerAst i)
+    preEvalAst (FloatAst f) _ = Right (FloatAst f)
+    preEvalAst (SymbolAst "#t") _ = Right (SymbolAst "#t")
+    preEvalAst (SymbolAst "#f") _ = Right (SymbolAst "#f")
     preEvalAst (SymbolAst x) env = case getValueEnv env x of
         Right ast -> Right ast
         Left err -> Left err
-    preEvalAst (If x y z) env = Right (If x y z)
-    preEvalAst (Call c) env = Right (Call c)
-    preEvalAst (Lambda x y) env = Right (Lambda x y)
-    preEvalAst (DefineAlt x y) env = Right (DefineAlt x y)
-    preEvalAst _ env = Left "Not implemented"
+    preEvalAst (If x y z) _ = Right (If x y z)
+    preEvalAst (Call c) _ = Right (Call c)
+    preEvalAst (Lambda x y) _ = Right (Lambda x y)
+    preEvalAst (DefineAlt x y) _ = Right (DefineAlt x y)
+    preEvalAst _ _ = Left "Not implemented"
 
     evalAst :: Ast -> Env -> Either String (Ast, Env)
     evalAst (SymbolAst x) env = Right (SymbolAst x, env)
