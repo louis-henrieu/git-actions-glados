@@ -16,7 +16,11 @@ printAst :: Ast -> IO ()
 printAst ast = case ast of
     (IntegerAst i) -> putStrLn (show i)
     (SymbolAst s) -> putStrLn s
-    (FloatAst f) -> print f
+    (FloatAst f) -> if f == (fromIntegral (round f))
+        then
+            putStrLn (show (round f))
+        else
+            putStrLn (show f)
     (Lambda x ast2) -> print "#<procedure>"
     _ -> print "The Ast isn't valid"
 
@@ -50,18 +54,18 @@ someFuncGetLine env = do
         then return ()
     else do
         line <- getLine
-        putStrLn (show (runParser (parseCpt) line))
-        -- case runParser (parseCpt) line of
-        --         Right (cpt, _) -> case cptToAst cpt of
-        --             Right ast -> case preEvalAst ast env of
-        --                 Right ast -> case evalAst ast env of
-        --                     Right result -> case (fst result) of
-        --                         Empty -> someFuncGetLine (snd result)
-        --                         _ -> printAst (fst result) >> someFuncGetLine (snd result)
-        --                     Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
-        --                 Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
-        --             Left err -> putStrLn ("Error : " ++ err) >> someFuncGetLine env
-        --         Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
+        -- putStrLn (show (runParser (parseCpt) line))
+        case runParser (parseCpt) line of
+                Right (cpt, _) -> case cptToAst cpt of
+                    Right ast -> case preEvalAst ast env of
+                        Right ast -> case evalAst ast env of
+                            Right result -> case (fst result) of
+                                Empty -> someFuncGetLine (snd result)
+                                _ -> printAst (fst result) >> someFuncGetLine (snd result)
+                            Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
+                        Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
+                    Left err -> putStrLn ("Error : " ++ err) >> someFuncGetLine env
+                Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
 
 someFuncFile :: Env -> [String] -> IO()
 someFuncFile env [] = return ()
