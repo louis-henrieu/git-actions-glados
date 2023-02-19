@@ -126,7 +126,7 @@ parseUFloat =
     )
   
 parseFloat :: Parser Float
-parseFloat = 
+parseFloat =
   Parser 
     ( \s  -> case runParser (parseChar '-') s of
       Right (c, s') -> case runParser (parseUFloat) s' of

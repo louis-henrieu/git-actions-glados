@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7e574977878537853726cbffe4a1c10cf71957ff373cc3d2a0cafb3445b4e34a
+-- hash: 539e7839f47364492954366b8541a2a62aeb33b2d1d2705b05278776c323b5f1
 
 name:           glados
 version:        0.1.0.0
@@ -60,6 +60,7 @@ test-suite glados-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Tast
       Tbasicfunc
       Tcpt
       Tdefine
