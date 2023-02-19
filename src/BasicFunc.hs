@@ -13,7 +13,7 @@ module BasicFunc (
     import Info
 
     convertFloatInt :: Ast -> Ast
-    convertFloatInt (FloatAst f) = if f == (fromIntegral (round f)) then 
+    convertFloatInt (FloatAst f) = if f == (fromIntegral (round f :: Integer)) then 
             IntegerAst (round (f)) 
         else 
             Empty
@@ -34,7 +34,13 @@ module BasicFunc (
     checkFloatInt (x:xs) env = case x of
         (IntegerAst _) -> checkFloatInt xs env
         (FloatAst _) -> checkFloatInt xs env
-        _ -> Left "The arg \'x\' is not a number"
+        (SymbolAst s) -> case getValueEnv env s of
+            Right ast -> case ast of
+                (IntegerAst _) -> checkFloatInt xs env
+                (FloatAst _) -> checkFloatInt xs env
+                _ -> Left ("Not a number" ++ show ast ++ " \n env is " ++ show env)
+            Left err -> Left err
+        _ -> Left "Not a number"
     
     preAdd :: [Ast] -> Env -> Either String Ast
     preAdd [] _ = Left "Add function needs at least two arguments"
@@ -121,9 +127,6 @@ module BasicFunc (
     division [] _ = Right (FloatAst 1)
     division list _ = Right (FloatAst (foldl1 (/) [x | FloatAst x <- list]))
 
-
-
-
     preMod :: [Ast] -> Env -> Either String Ast
     preMod [] _ = Left "Mod function needs at least two arguments"
     preMod (x:y:xs) env = case length (x:y:xs) of
@@ -173,4 +176,4 @@ module BasicFunc (
     inf (FloatAst x : FloatAst y : []) _ = case x < y of
         True -> Right (SymbolAst "#t")
         False -> Right (SymbolAst "#f")
-    inf _ _ = Left "Not a number"
+    inf ast env = error (show ast ++ show env)

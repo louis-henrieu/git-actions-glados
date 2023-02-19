@@ -7,7 +7,7 @@ import System.Environment
 parseFile :: String -> Int -> String -> [String] -> [String]
 parseFile [] 0 [] file = file
 parseFile [] 0 line file = file ++ [line]
-parseFile [] _ [] file = error "Invalid file"
+parseFile [] _ [] _ = error "Invalid file"
 parseFile (x:xs) parenthesis line file = case x of
     '\0' -> case parenthesis of
         0 -> parseFile xs 0 [] (file ++ [line])
@@ -30,4 +30,4 @@ main = do
         1 -> do
             file <- readFile (head args)
             someFuncFile envStorage (parseFile file 0 [] [])
-            
+        _ -> error "Invalid arguments"
