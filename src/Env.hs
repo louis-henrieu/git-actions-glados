@@ -3,7 +3,8 @@ module Env (
     updateEnv,
     printAllEnv,
     replaceEnv,
-    updateAllEnv
+    updateAllEnv,
+    replaceAllEnv
 ) where
     import Info
     import BasicFunc
@@ -28,7 +29,12 @@ module Env (
         ]
 
     updateEnv :: String -> Ast -> Env -> Env
-    updateEnv symbol ast env = (symbol, ast) : env
+    updateEnv symbol ast env = case ast of
+        SymbolAst s -> case getValueEnv env s of
+            Right _c
+             -> error ("Error: " ++ s ++ " is not a value")
+            Left _ -> (symbol, ast):env
+        _ -> (symbol, ast):env
 
     replaceEnv :: String -> Ast -> [(String, Ast)] -> [(String, Ast)] -> Env
     replaceEnv _ _ [] env = env
@@ -42,6 +48,11 @@ module Env (
     updateAllEnv [] [] env = env
     updateAllEnv (s:symbols) (a:asts) env = updateAllEnv symbols asts (updateEnv s a env)
     updateAllEnv _ _ _ = []
+
+    replaceAllEnv :: [String] -> [Ast] -> Env -> Env
+    replaceAllEnv [] [] env = env
+    replaceAllEnv (s:symbols) (a:asts) env = replaceAllEnv symbols asts (replaceEnv s a env [])
+    replaceAllEnv _ _ _ = []
 
     printAllEnv :: Env -> IO ()
     printAllEnv [] = return ()

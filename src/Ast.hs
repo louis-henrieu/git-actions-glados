@@ -114,9 +114,9 @@ module Ast (
     lambdaFunc _ _ _ [] = Left "Lambda function needs at least one argument"
     lambdaFunc symbols ast args env = if ((length symbols) == (length args))
         then do
-            let env2 = updateAllEnv symbols args env
+            let env2 = updateAllEnv symbols (convertArgs args env) env
             case evalAst ast env2 of
-                Right (ast2, env3) -> Right (ast2, env3)
+                Right (ast2, env3) -> Right (ast2, (eraseDoubles env3 []))
                 Left err -> Left err
         else
             Left "Error in lambda - Invalid number of arguments"
@@ -148,32 +148,32 @@ module Ast (
         Left err -> Left err
         Right ast -> case evalAst ast env of
             Left err -> Left err
-            Right (ast, env2) -> case ast of
+            Right (c_ast, env2) -> case c_ast of
                 SymbolAst("#t") -> case preEvalAst y env2 of
                     Left err -> Left err
-                    Right ast -> case evalAst ast env2 of
+                    Right r_ast -> case evalAst r_ast env2 of
                         Left err -> Left err
-                        Right (ast, env3) -> Right (ast, env3)
+                        Right (f_ast, env3) -> Right (f_ast, env3)
                 SymbolAst("#f") -> case preEvalAst z env2 of
                     Left err -> Left err
-                    Right ast -> case evalAst ast env2 of
+                    Right r_ast -> case evalAst r_ast env2 of
                         Left err -> Left err
-                        Right (ast, env3) -> Right (ast, env3)
+                        Right (f_ast, env3) -> Right (f_ast, env3)
                 _ -> Left "Error in if"
     evalAst (Call(SymbolAst x : xs)) env = case getValueEnv env x of
         Left err -> Left err
         Right res -> case res of
-            ArgsLambda (x, y) -> lambdaFunc x y xs env
+            ArgsLambda (f_x, y) -> lambdaFunc f_x y xs env
             Builtin f -> case f (convertArgs xs env) env of
-                Left err -> Left ("Error in builtin function " ++ x ++ " : " ++ err)
+                Left err -> Left ("Error in builtin function " ++ x ++ " : " ++ err ++ "! ++ env \n\n\n : " ++ show(env))
                 Right ast -> Right (ast, env)
             _ -> Left (x ++ " is not a function")
-    evalAst (Lambda x y) env = Right(SymbolAst "#<procedure>", env)
+    evalAst (Lambda _ _) env = Right(SymbolAst "#<procedure>", env)
     evalAst (ArgsLambda _) env = Right(SymbolAst "#<procedure>", env)
     evalAst (Call ((Lambda x y) : z)) env = lambdaFunc x y z env
     evalAst (Call (Builtin x : args)) env = case x args env of
         Left err -> error (show err)
         Right res -> Right (res, env)
-    evalAst (Call (ArgsLambda (x ,y) : z)) env = lambdaFunc x y z env
-    evalAst (Builtin x) env = Right (SymbolAst"#<procedure>", env)
+    evalAst (Call (ArgsLambda (x, y) : z)) env = lambdaFunc x y z env
+    evalAst (Builtin _) env = Right (SymbolAst"#<procedure>", env)
     evalAst ast _ = error("The ast is : " ++ show(ast))
