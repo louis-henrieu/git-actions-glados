@@ -13,6 +13,7 @@ module Info (
         -- => Lambda String [Ast]
         | IntegerAst Int 
         | FloatAst Float -- à rajouter dans parseCpt
+        | StrAst String
         | SymbolAst String
         | Lambda [String] Ast
         | If Ast Ast Ast

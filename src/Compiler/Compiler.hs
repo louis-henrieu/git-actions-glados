@@ -14,3 +14,13 @@ resolution l env = case l of
     [] -> env
     (Define s a):l -> resolution l (safeUpdateEnv s a env)
 
+replaceSymbol :: [Ast] -> Env -> Either String [Ast]
+replaceSymbol l env = case l of
+    [] -> Right ([])
+    (Define s a) : l -> (Define s a) : (replaceSymbol l env)
+    (SymbolAst s) : l -> case getValueEnv env s of
+        Right (ast) -> ast : (replaceSymbol l env)
+        Left (x) -> Left ("replaceSymbol ERROR : " ++ x)
+    x:l -> x : (replaceSymbol l env)
+
+
