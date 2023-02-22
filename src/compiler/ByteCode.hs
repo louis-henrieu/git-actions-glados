@@ -10,7 +10,14 @@ module ByteCode where
 
 exampleFunction :: a -> b -> c
 exampleFunction a b = a + b
--- LOAD_FAST a
--- LOAD_FAST b
+-- LOAD_FAST    0 (a)
+-- LOAD_FAST    1 (b)
 -- BINARY_ADD
 -- RETURN_VALUE
+-- in theory every single instruction is designated by a byte
+
+-- the there above bytcode is represented as [124, 0, 124, 1, 23, 0, 83, 0]
+-- 124 -> LOAD_FAST
+-- 0 & 1 -> a & b
+-- 23 -> BINARY_ADD
+-- 83 -> RETURN_VALUE
