@@ -12,68 +12,82 @@ module Ast (
     import Env
     import Define
 
-    checkOnlySymbols :: [Cpt] -> Either String Bool
-    checkOnlySymbols [] = Right True
-    checkOnlySymbols (x:xs) = case x of
-        Symbol _ -> checkOnlySymbols xs
-        _ -> Left ("Error :" ++ show x ++ " is not a symbol")
+    -- checkOnlySymbols :: [Cpt] -> Either String Bool
+    -- checkOnlySymbols [] = Right True
+    -- checkOnlySymbols (x:xs) = case x of
+    --     Symbol _ -> checkOnlySymbols xs
+    --     _ -> Left ("Error :" ++ show x ++ " is not a symbol")
 
-    parsingDefine :: Cpt -> Either String Ast
-    parsingDefine (List (Symbol "define":Symbol s:xs)) = case length xs of
-        1 -> case cptToAst (head xs) of
-            Left err -> Left ("The ast part of the define is invalid: " ++ err)
-            Right ast -> Right (Define s ast)
-        _ -> Left "The define form is invalid"
-    parsingDefine (List (Symbol "define":List x:xs)) = 
-        if (length xs == 1) && (checkOnlySymbols x == Right True) then
-            (case cptToAst (head xs) of
-                Left err -> Left ("The ast part of the define is invalid: " ++ err)
-                Right ast -> Right (DefineAlt (map (\ (Symbol symb) -> symb) x) ast))
-        else
-            Left "The define form is invalid"
-    parsingDefine _ = Left "The define form is invalid"
+    -- parsingDefine :: Cpt -> Either String Ast
+    -- parsingDefine (List (Symbol "define":Symbol s:xs)) = case length xs of
+    --     1 -> case cptToAst (head xs) of
+    --         Left err -> Left ("The ast part of the define is invalid: " ++ err)
+    --         Right ast -> Right (Define s ast)
+    --     _ -> Left "The define form is invalid"
+    -- parsingDefine (List (Symbol "define":List x:xs)) = 
+    --     if (length xs == 1) && (checkOnlySymbols x == Right True) then
+    --         (case cptToAst (head xs) of
+    --             Left err -> Left ("The ast part of the define is invalid: " ++ err)
+    --             Right ast -> Right (DefineAlt (map (\ (Symbol symb) -> symb) x) ast))
+    --     else
+    --         Left "The define form is invalid"
+    -- parsingDefine _ = Left "The define form is invalid"
 
-    parsingList :: Cpt -> Either String Ast
-    parsingList (List (Symbol "define":xs)) = parsingDefine (List (Symbol "define":xs))
-    parsingList (List (Symbol "lambda":List x:xs)) = if length xs == 1 then 
-        if null x then
-            case cptToAst (head xs) of
-                Left err -> Left ("The ast part of the lambda is invalid: " ++ err)
-                Right ast -> Right (Lambda [] ast)
-            else if checkOnlySymbols x == Right True then
-                case cptToAst (head xs) of
-                    Left err -> Left ("The ast part of the lambda is invalid: " ++ err)
-                    Right ast -> case ast of
-                        SymbolAst s -> Right (Lambda (map (\(Symbol symb) -> symb) x) (SymbolAst s))
-                        Call s -> Right (Lambda (map (\(Symbol symb) -> symb) x) (Call s))
-                        _ -> Left "The lambda form is invalid"
-                else
-                    Left "The lambda form is invalid"
-        else
-            Left "The lambda form is invalid"
-    parsingList (List (Symbol "if":x:y:z:xs)) = if null xs then
-        case cptToAst x of
-            Left err -> Left ("The ast part of the if is invalid: " ++ err)
-            Right ast -> case cptToAst y of
-                Left err -> Left ("The ast part of the if is invalid: " ++ err)
-                Right ast2 -> case cptToAst z of
-                    Left err -> Left ("The ast part of the if is invalid: " ++ err)
-                    Right ast3 -> Right (If ast ast2 ast3)
-        else
-            Left "The if form is invalid"
-    parsingList (List s) = Right (Call (map (\x -> case cptToAst x of
-        Left err -> error err
-        Right ast -> ast) s))
-    parsingList _ = Left "Error in cptToAst: this is not a valid list"
+    -- parsingList :: Cpt -> Either String Ast
+    -- parsingList (List (Symbol "define":xs)) = parsingDefine (List (Symbol "define":xs))
+    -- parsingList (List (Symbol "lambda":List x:xs)) = if length xs == 1 then 
+    --     if null x then
+    --         case cptToAst (head xs) of
+    --             Left err -> Left ("The ast part of the lambda is invalid: " ++ err)
+    --             Right ast -> Right (Lambda [] ast)
+    --         else if checkOnlySymbols x == Right True then
+    --             case cptToAst (head xs) of
+    --                 Left err -> Left ("The ast part of the lambda is invalid: " ++ err)
+    --                 Right ast -> case ast of
+    --                     SymbolAst s -> Right (Lambda (map (\(Symbol symb) -> symb) x) (SymbolAst s))
+    --                     Call s -> Right (Lambda (map (\(Symbol symb) -> symb) x) (Call s))
+    --                     _ -> Left "The lambda form is invalid"
+    --             else
+    --                 Left "The lambda form is invalid"
+    --     else
+    --         Left "The lambda form is invalid"
+    -- parsingList (List (Symbol "if":x:y:z:xs)) = if null xs then
+    --     case cptToAst x of
+    --         Left err -> Left ("The ast part of the if is invalid: " ++ err)
+    --         Right ast -> case cptToAst y of
+    --             Left err -> Left ("The ast part of the if is invalid: " ++ err)
+    --             Right ast2 -> case cptToAst z of
+    --                 Left err -> Left ("The ast part of the if is invalid: " ++ err)
+    --                 Right ast3 -> Right (If ast ast2 ast3)
+    --     else
+    --         Left "The if form is invalid"
+    -- parsingList (List s) = Right (Call (map (\x -> case cptToAst x of
+    --     Left err -> error err
+    --     Right ast -> ast) s))
+    -- parsingList _ = Left "Error in cptToAst: this is not a valid list"
 
-    cptToAst :: Cpt -> Either String Ast
-    cptToAst (NumberFloat f) = Right (FloatAst f)
-    cptToAst (Number n) = Right (IntegerAst n)
-    cptToAst (Symbol s) = Right (SymbolAst s)
-    cptToAst (List x) = parsingList (List x)
+    -- cptToAst :: Cpt -> Either String Ast
+    -- cptToAst (NumberFloat f) = Right (FloatAst f)
+    -- cptToAst (Number n) = Right (IntegerAst n)
+    -- cptToAst (Symbol s) = Right (SymbolAst s)
+    -- cptToAst (List x) = parsingList (List x)
 
-    --convertArgs :: [Ast] -> Env -> [Ast]
-    -- convert the symbol to the value
+    parseList :: Cpt -> Ast
+    parseList (List (Symbol x:Symbol '>':y:xs)) = case length (y:xs) of
+        1 -> Define x (cptToAst y)
+        _ -> error "Holala ! Only one argument is allowed in define"
+    parseList (List x:'>':y:xs) = case length (y:xs) of
+        1 -> Define (show x) (cptToAst y
+        _ -> error "Holala ! Only one argument is allowed in define"
+    parseList _ = error "Holala ! Error in parseList"
+
+    cptToAst :: Cpt -> Ast
+    cptToAst (NumberFloat f) = FloatAst f
+    cptToAst (Number n) = IntegerAst n
+    cptToAst (Symbol s) = SymbolAst s
+    cptToAst (List x) = parseList (List x)
+    cptToAst _ = error "Holala ! Error in cptToAst"
+
     convertArgs :: [Ast] -> Env -> [Ast]
     convertArgs [] _ = []
     convertArgs (arg:args) env = case arg of
@@ -86,29 +100,6 @@ module Ast (
                 Left _ -> Empty : convertArgs args env
             Left _ -> Empty : convertArgs args env
         _ -> arg : convertArgs args env
-
-    -- cptToAst :: Cpt -> Either String Ast
-    -- cptToAst (Number i) = Right (IntegerAst i)
-    -- cptToAst (Symbol s) = Right (SymbolAst s)
-    -- cptToAst (List (Symbol "lambda" : List l : cpt : [])) = case cptToAst cpt of
-    --     Right ast -> Right (Lambda (map (\(Symbol s) -> s) l) ast)
-    --     Left err -> Left err
-    -- cptToAst (List (Symbol "lambda" : _)) = Left "Invalid lambda"
-    -- cptToAst (List (Symbol "if" : cpt1 : cpt2 : cpt3 : [])) = case cptToAst cpt1 of
-    --     Right ast1 -> case cptToAst cpt2 of
-    --         Right ast2 -> case cptToAst cpt3 of
-    --             Right ast3 -> Right (If ast1 ast2 ast3)
-    --             Left err -> Left err
-    --         Left err -> Left err
-    --     Left err -> Left err
-    -- cptToAst (List (Symbol "if" : _)) = Left "Invalid if"
-    -- cptToAst (List (Symbol "define" : Symbol s : cpt : [])) = case cptToAst cpt of
-    --     Right ast -> Right (Define s ast)
-    --     Left err -> Left err
-    -- cptToAst (List (Symbol "define" : _)) = Left "Invalid define"
-    -- cptToAst (List l) = case t of
-    --     t -> cptToAst t
-    --     where t = List (Symbol "call" : l)
 
     lambdaFunc :: [String] -> Ast -> [Ast] -> Env -> Either String (Ast, Env)
     lambdaFunc _ _ _ [] = Left "Lambda function needs at least one argument"

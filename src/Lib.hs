@@ -29,18 +29,17 @@ someFuncGetLine env = do
         then return ()
     else do
         line <- getLine
-        putStrLn (show (runParser (parseCpt) line))
-        -- case runParser (parseCpt) line of
-        --         Right (cpt, _) -> case cptToAst cpt of
-        --             Right ast -> case preEvalAst ast env of
-        --                 Right ast_s -> case evalAst ast_s env of
-        --                     Right result -> case (fst result) of
-        --                         Empty -> someFuncGetLine (snd result)
-        --                         _ -> printAst (fst result) >> someFuncGetLine (snd result)
-        --                     Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
-        --                 Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
-        --             Left err -> putStrLn ("Error : " ++ err) >> someFuncGetLine env
-        --         Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
+        case runParser (parseCpt) line of
+                Right (cpt, _) -> case cptToAst cpt of
+                    Right ast -> case preEvalAst ast env of
+                        Right ast_s -> case evalAst ast_s env of
+                            Right result -> case (fst result) of
+                                Empty -> someFuncGetLine (snd result)
+                                _ -> printAst (fst result) >> someFuncGetLine (snd result)
+                            Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
+                        Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
+                    Left err -> putStrLn ("Error : " ++ err) >> someFuncGetLine env
+                Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
 
 someFuncFile :: Env -> [String] -> IO()
 someFuncFile _ [] = return ()
