@@ -17,9 +17,11 @@ module Info (
         | SymbolAst String
         | Lambda [String] Ast
         | If Ast Ast Ast
+        | Either Ast Ast
         | ArgsLambda ([String], Ast)
         | Builtin ([Ast] -> Env -> Either String Ast)
         | Call [Ast]
+        | Case Ast [(Ast, Ast)]
         | Empty
         deriving Show
 
