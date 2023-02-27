@@ -9,6 +9,7 @@ data Cpt = Number Int
         | NumberFloat Float
         | Symbol String
         | List [Cpt]
+        | Separator String
         deriving Show
 
 printTree :: Cpt -> String

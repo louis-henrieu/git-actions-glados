@@ -4,17 +4,17 @@ Comment le langage est pensé :
 - point virgule définition de fin de ligne (+ simple en parsing) 
 
 Function :
-[[calc x y] > [- [+ x y] 2]] ✅
+calc x y > [- [+ x y] 2] ✅
 
-If : [ Siii cond x y] ❎
+If : Siii cond x y ❎
 
 Case of : 
-[ Prrr of symbole [
+Prrr of symbol [
     [poss AST]
     [poss AST]
     [poss AST]
     [AST] => error if not found
-]] ❎
+] ❎
 
 case x of
     1 -> 2
@@ -23,7 +23,7 @@ case x of
     _ -> pass
 
 Either : Truc (True : Yupi, False : Oulah) ❎
-[UnDeux Yupi AST Oulah AST] ❎ => Yupi Res
+UnDeux Yupi AST Oulah AST ❎ => Yupi Res
 
 Definition :
-[ > a 5 ] ✅
+a => 5 ✅
