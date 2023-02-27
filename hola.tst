@@ -9,7 +9,7 @@ calc x y > [- [+ x y] 2] ✅
 If : Siii cond x y ❎
 
 Case of : 
-Prrr of symbol [
+Prrr symbol of [
     [poss AST]
     [poss AST]
     [poss AST]

@@ -40,11 +40,11 @@ module CptAst (
     cptToAst (List x) = parseList (List x)
     cptToAst _ = error "Holala ! Error in cptToAst"
 
-    findSeperator :: [Cpt] -> Int -> Maybe Int
-    findSeperator [] _ = Nothing
-    findSeperator (x : xs) i = case x of
+    findSeparator :: [Cpt] -> Int -> Maybe Int
+    findSeparator [] _ = Nothing
+    findSeparator (x : xs) i = case x of
         Separator "=>" -> Just i
-        _ -> findSeperator xs (i + 1)
+        _ -> findSeparator xs (i + 1)
 
     convertFunc :: [Cpt] -> Int -> [String] -> Either String [String]
     convertFunc _ 0 x = Right x
@@ -54,13 +54,34 @@ module CptAst (
         Symbol s -> convertFunc xs (i - 1) (y ++ [s])
         _ -> Left ("Holala ! There is a non symbol in the list of arguments ! Argument is : " ++ show x ++ "and i is " ++ show i)
 
+    convertList :: [Cpt] -> [Ast] -> Bool -> Either String [Ast]
+    convertList [] [] _ = Left "Holala ! Can't convert an empty list"
+    convertList [] x True = Right x
+    convertList [] x False = Left "Holala ! Missing a default case in the Prrr statement"
+    convertList (x : xs) y bool = case x of
+        List (ast : asts) -> case length asts of
+                0 -> convertList xs (y ++ [cptToAst ast]) True
+                _ -> case bool of
+                    True -> Left "Holala ! You can't put states after the default case"
+                    False -> case length asts of
+                        1 -> convertList xs (y ++ [cptToAst (head asts)]) True
+                        _ -> Left "Holala 3 ! There is a problem with the number of arguments in the Prrr statement + there is a default case"
+        _ -> Left "Holala ! There can only be statement as list in the Prrr statement"
+
+    specialCaseVerify :: [Cpt] -> Either String Ast
+    specialCaseVerify (Symbol "Prrr"  : Symbol s : Symbol "of" : List x : xs) = case length xs of 
+        0 -> case (convertList x [] False) of
+            Left s -> Left s
+            Right ast -> Right (Prrr s (Call ast))
+        _ -> Left "Holala 1 ! There is a problem with the number of arguments in the Prrr statement"
+
     cptToAstList :: [Cpt] -> Either String Ast
     cptToAstList [] = Left "Holala ! Can't parse an empty list"
-    cptToAstList x = case findSeperator x 0 of
+    cptToAstList x = case findSeparator x 0 of
         Just i -> case i of
             0 -> Left "Holala ! Seperator can't be the first element !!!"
             1 -> case length x of   
-                3 -> case ( head x) of
+                3 -> case (head x) of
                     Symbol s -> Right (Define s (cptToAst (x !! 2)))
                     _ -> Left "Holala ! The first element of the list must be a symbol"
                 _ -> Left ("Holala ! There si a length of " ++ show (length x))
@@ -69,4 +90,6 @@ module CptAst (
                 Right f -> Right (Lambda f (cptToAst (x !! (i + 1))))
         Nothing -> case length x of
             1 -> Right (cptToAst (head x))
-            _ -> Right (cptToAst (List x))
+            _ -> case specialCaseVerify x of
+                Right ast -> Right ast
+                Left s -> Left s
