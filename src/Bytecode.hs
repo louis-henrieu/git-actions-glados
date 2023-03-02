@@ -42,4 +42,5 @@ module Bytecode (
                     Just s4 -> s4
                     Nothing -> error "Not implemented yet"
         _ -> error "Not implemented yet"
-    createByteCode _ _ stack = stack
+    createByteCode (FloatAst f) env stack = stack { bytecode = bytecode stack ++ ["LOAD_CONST " ++ (show (length (const_value stack)))], const_value = const_value stack ++ [FloatAst f] }
+    createByteCode ast _ stack = error (show ast)
