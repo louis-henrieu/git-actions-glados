@@ -3,7 +3,8 @@ module Info (
     Env,
     getValueEnv,
     checkIfEmpty,
-    eraseDoubles
+    eraseDoubles,
+    Stack(..),
     ) where
     import Prelude hiding (lookup)
     import Prelude hiding (lookup)
@@ -45,3 +46,10 @@ module Info (
     eraseDoubles (x:xs) env = if (fst x) `elem` (map fst env)
         then eraseDoubles xs env
         else eraseDoubles xs (x:env)
+    
+    data Stack = Stack {
+    fast :: [String],
+    global :: [String],
+    const_value :: [Ast],
+    bytecode :: [String]
+    }

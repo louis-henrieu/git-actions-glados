@@ -136,9 +136,9 @@ afterClosingParenthesis (x : xs) = case x of
 parseList :: Parser a -> Parser [a]
 parseList p =
   Parser
-    ( \s -> case runParser (parseChar '[') s of
+    ( \s -> case runParser (parseChar '(') s of
         Right (_, s') -> case runParser (parseMany (parseAndWith (,) p parseWhiteSpace)) s' of
-          Right (as, s'') -> case runParser (parseChar ']') s'' of
+          Right (as, s'') -> case runParser (parseChar ')') s'' of
             Right (_, s''') -> Right (map fst as, s''')
             Left (_) -> case isClosingParenthesis s'' of
               True -> case runParser p (beforeClosingParenthesis s'' "") of
