@@ -4,4 +4,4 @@ module Stack (
     import Info
 
     initStack :: Stack
-    initStack = Stack { fast = [], global = [], const_value = [], bytecode = [] }
+    initStack = Stack { fast = [], global = [], constValue = [], bytecode = [] }

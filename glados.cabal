@@ -1,8 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.1.
+-- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
+--
+-- hash: 58562840cfb9ff160f3683f1d2b8c4c176279c46da182bce0cd200b6138d1322
 
 name:           glados
 version:        0.1.0.0

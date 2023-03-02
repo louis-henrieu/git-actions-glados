@@ -48,8 +48,8 @@ module Info (
         else eraseDoubles xs (x:env)
     
     data Stack = Stack {
-    fast :: [String],
-    global :: [String],
-    const_value :: [Ast],
-    bytecode :: [String]
+        fast :: [String], -- local variables
+        global :: [String], --  global variables
+        constValue :: [Ast], -- constants
+        bytecode :: [String] -- final bytecode
     }
