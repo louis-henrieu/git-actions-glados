@@ -523,6 +523,26 @@ testPreSup = describe "Test preSup function" $ do
         let test = preSup [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", FloatAst 2.0)]
         let rest = show test
         rest `shouldBe` "Left \"Not a number\""
+    it "Test with only one number" $ do
+        let test = preSup [IntegerAst 1] []
+        let rest = show test
+        rest `shouldBe` "Left \"> operator needs at least two arguments\""
+    it "Test with two elements x < y" $ do
+        let test = preSup [IntegerAst 1, IntegerAst 2] []
+        let rest = show test
+        rest `shouldBe` "Right (SymbolAst \"#f\")"
+    it "Test with two elements x > y" $ do
+        let test = preSup [IntegerAst 2, IntegerAst 1] []
+        let rest = show test
+        rest `shouldBe` "Right (SymbolAst \"#t\")"
+    it "Test with two float x < y" $ do
+        let test = preSup [FloatAst 1.01, FloatAst 2.01] []
+        let rest = show test
+        rest `shouldBe` "Right (SymbolAst \"#f\")"
+    it "Test with two float x > y" $ do
+        let test = preSup [FloatAst 2.01, FloatAst 1.01] []
+        let rest = show test
+        rest `shouldBe` "Right (SymbolAst \"#t\")"
 
 testPreInf :: Spec
 testPreInf = describe "Test preInf function" $ do
@@ -534,11 +554,27 @@ testPreInf = describe "Test preInf function" $ do
     --    let test = preInf [IntegerAst 1] []
     --    let rest = show test
     --    rest `shouldBe` "Right (IntegerAst 1)"
-    it "Test preInf with two elements" $ do
+    it "Test preInf with two elements x < y" $ do
         let test = preInf [IntegerAst 1, IntegerAst 2] []
         let rest = show test
         rest `shouldBe`"Right (SymbolAst \"#t\")"
-    it "Test preInf with two elements float" $ do
+    it "Test preInf with two elements x > y" $ do
+        let test = preInf [IntegerAst 2, IntegerAst 1] []
+        let rest = show test
+        rest `shouldBe` "Right (SymbolAst \"#f\")"
+    it "Test preInf with two elements float x < y" $ do
         let test = preInf [FloatAst 10.51, FloatAst 1.01] []
         let rest = show test
         rest `shouldBe` "Right (SymbolAst \"#f\")"
+    it "Test preInf with two elements float x > y" $ do
+        let test = preInf [FloatAst 1.01, FloatAst 10.51] []
+        let rest = show test
+        rest `shouldBe` "Right (SymbolAst \"#t\")"
+    it "Test with only one number" $ do
+        let test = preInf [IntegerAst 1] []
+        let rest = show test
+        rest `shouldBe` "Left \"< operator needs at least two arguments\""
+    --it "Test with two symbols" $ do
+    --    let test = preInf [SymbolAst "a", SymbolAst "b"] []
+    --    let rest = show test
+    --    rest `shouldBe` "Right (SymbolAst \"#t\")"
