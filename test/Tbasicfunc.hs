@@ -18,6 +18,8 @@ testBasicFunc = describe "\nTest all functions of BasicFunc file" $ do
     testCheckZero
     testPreDiv
     testPreMod
+    testPreSup
+    testPreInf
 
 testCheckFloatInt :: Spec
 testCheckFloatInt = describe "Test checkFloatInt function" $ do
@@ -441,40 +443,102 @@ testPreMod = describe "Test preMod function" $ do
     it "Test preMod with two elements" $ do
         let test = preMod [IntegerAst 1, IntegerAst 2] []
         let rest = show test
-        rest `shouldBe` "Right (IntegerAst 1)"
+        rest `shouldBe` "Left \"There is at least one parameter that isn't an integer\""
     it "Test preMod with two elements float" $ do
         let test = preMod [FloatAst 10.51, FloatAst 1.01] []
         let rest = show test
-        rest `shouldBe` "Left \"Mod function only works with integers\""
+        rest `shouldBe` "Left \"There is at least one parameter that isn't an integer\""
     it "Test preMod with two elements and one symbol int" $ do
         let test = preMod [IntegerAst 1, SymbolAst "a"] [("a", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"Mod function only works with integers\""
+        rest `shouldBe` "Left \"There is at least one parameter that isn't an integer\""
     it "Test preMod with two elements and one symbol float" $ do
         let test = preMod [FloatAst 1.01, SymbolAst "a"] [("a", FloatAst 2.99)]
         let rest = show test
-        rest `shouldBe` "Left \"Mod function only works with integers\""
+        rest `shouldBe` "Left \"There is at least one parameter that isn't an integer\""
     it "Test preMod with two elements and one symbol" $ do
         let test = preMod [FloatAst (-1.01), SymbolAst "a"] [("a", FloatAst 0.01)]
         let rest = show test
-        rest `shouldBe` "Left \"Mod function only works with integers\""
+        rest `shouldBe` "Left \"There is at least one parameter that isn't an integer\""
     it "Test preMod with two elements and one symbol" $ do
         let test = preMod [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b")]
         let rest = show test
-        rest `shouldBe` "Left \"Mod function only works with integers\""
+        rest `shouldBe` "Left \"There is at least one parameter that isn't an integer\""
     it "Test preMod with two elements and one symbol" $ do
         let test = preMod [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"Mod function only works with integers\""
+        rest `shouldBe` "Left \"There is at least one parameter that isn't an integer\""
     it "Test preMod with two elements and one symbol" $ do
         let test = preMod [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Left \"Mod function only works with integers\""
+        rest `shouldBe` "Left \"There is at least one parameter that isn't an integer\""
     it "Test preMod only needs two arguments" $ do
         let test = preMod [IntegerAst 1, SymbolAst "a", IntegerAst 2] [("a", SymbolAst "b"), ("b", FloatAst 2.0), ("c", FloatAst 2.0)]
         let rest = show test  
-        rest `shouldBe` "Left \"Mod function only needs two arguments\""  
+        rest `shouldBe` "Left \"Mod function only needs two arguments\""
     it "Test symbol does not exist" $ do
         let test = preMod [IntegerAst 1, SymbolAst "a"] [("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"Mod function only works with integers\""
+        rest `shouldBe` "Left \"There is at least one parameter that isn't an integer\""
+
+testPreSup :: Spec
+testPreSup = describe "Test preSup function" $ do
+    it "Test preSup with empty list" $ do
+        let test = preSup [] []
+        let rest = show test
+        rest `shouldBe` "Left \"> operator needs at least two arguments\""
+    --it "Test preSup with one element" $ do
+    --    let test = preSup [IntegerAst 1] []
+    --    let rest = show test
+    --    rest `shouldBe` "Right (IntegerAst 1)"
+    it "Test preSup with two elements" $ do
+        let test = preSup [IntegerAst 1, IntegerAst 2] []
+        let rest = show test
+        rest `shouldBe` "Right (SymbolAst \"#f\")"
+    it "Test preSup with two elements float" $ do
+        let test = preSup [FloatAst 10.51, FloatAst 1.01] []
+        let rest = show test
+        rest `shouldBe` "Right (SymbolAst \"#t\")"
+    it "Test preSup with two elements and one symbol int" $ do
+        let test = preSup [IntegerAst 1, SymbolAst "a"] [("a", IntegerAst 2)]
+        let rest = show test
+        rest `shouldBe` "Left \"Not a number\""
+    it "Test preSup with two elements and one symbol float" $ do
+        let test = preSup [FloatAst 1.01, SymbolAst "a"] [("a", FloatAst 2.99)]
+        let rest = show test
+        rest `shouldBe` "Left \"Not a number\""
+    it "Test preSup with two elements and one symbol" $ do
+        let test = preSup [FloatAst (-1.01), SymbolAst "a"] [("a", FloatAst 0.01)]
+        let rest = show test
+        rest `shouldBe` "Left \"Not a number\""
+    it "Test preSup with two elements and one symbol" $ do
+        let test = preSup [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b")]
+        let rest = show test
+        rest `shouldBe` "Left \"Not a number\""
+    it "Test preSup with two elements and one symbol" $ do
+        let test = preSup [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", IntegerAst 2)]
+        let rest = show test
+        rest `shouldBe` "Left \"Not a number\""
+    it "Test preSup with two elements and one symbol" $ do
+        let test = preSup [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", FloatAst 2.0)]
+        let rest = show test
+        rest `shouldBe` "Left \"Not a number\""
+
+testPreInf :: Spec
+testPreInf = describe "Test preInf function" $ do
+    it "Test preInf with empty list" $ do
+        let test = preInf [] []
+        let rest = show test
+        rest `shouldBe` "Left \"< operator needs at least two arguments\""
+    --it "Test preInf with one element" $ do
+    --    let test = preInf [IntegerAst 1] []
+    --    let rest = show test
+    --    rest `shouldBe` "Right (IntegerAst 1)"
+    it "Test preInf with two elements" $ do
+        let test = preInf [IntegerAst 1, IntegerAst 2] []
+        let rest = show test
+        rest `shouldBe`"Right (SymbolAst \"#t\")"
+    it "Test preInf with two elements float" $ do
+        let test = preInf [FloatAst 10.51, FloatAst 1.01] []
+        let rest = show test
+        rest `shouldBe` "Right (SymbolAst \"#f\")"
