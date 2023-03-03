@@ -4,6 +4,7 @@ module Ast (
     parsingList,
     cptToAst,
     convertArgs,
+    lambdaFunc,
     preEvalAst,
     evalAst
 ) where
