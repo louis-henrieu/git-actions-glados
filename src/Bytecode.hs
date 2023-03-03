@@ -3,6 +3,7 @@ module Bytecode (
 ) where
 
     import Info
+    import Ast
 
     getToken :: String -> Maybe String
     getToken "+" = Just "BINARY_ADD"
@@ -18,7 +19,7 @@ module Bytecode (
 
     addByteCodeConst :: Stack -> Maybe Stack
     addByteCodeConst stack = 
-        Just stack { bytecode = bytecode stack ++ ["LOAD_CONST " ++ (show (length (constValue stack))), "STORE_FAST " ++ (show (length (fast stack)))] }
+        Just stack { bytecode = bytecode stack ++ ["LOAD_CONST " ++ (show (length (constValue stack) + 1)), "STORE_FAST " ++ (show (length (fast stack))), ""], end = False }
     
     addFast :: Stack -> String -> Maybe Stack
     addFast stack name = 
@@ -27,10 +28,7 @@ module Bytecode (
     addConst :: Stack -> Ast -> Maybe Stack
     addConst stack token = 
         Just stack { constValue = constValue stack ++ [token] }
-    
-    createByteCodeCall :: [Ast] -> Env -> Stack -> Stack
-    createByteCodeCall [] _ stack = stack
-    createByteCodeCall ( x : xs ) = 
+
 
     createByteCode :: Ast -> Env -> Stack -> Stack
     createByteCode (Define name ast) env stack = case ast of
@@ -46,8 +44,6 @@ module Bytecode (
                     Just s4 -> s4
                     Nothing -> error "Not implemented yet"
         _ -> error "Not implemented yet"
-    createByteCode (FloatAst f) env stack = stack { bytecode = bytecode stack ++ ["LOAD_CONST " ++ (show (length (constValue stack)))], constValue = constValue stack ++ [FloatAst f] }
-    createByteCode (Call x) env stack = createByteCodeCall x env stack
-    createByteCode ast _ stack = error (show ast)
+    createByteCode _ _ stack = stack { bytecode = bytecode stack ++ ["LOAD_CONST 0", "RETURN_VALUE"], end = True }
 
     --callAdd :: 

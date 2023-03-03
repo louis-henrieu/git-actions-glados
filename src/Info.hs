@@ -51,5 +51,6 @@ module Info (
         fast :: [String], -- local variables
         global :: [String], --  global variables
         constValue :: [Ast], -- constants
-        bytecode :: [String] -- final bytecode
+        bytecode :: [String], -- final bytecode
+        end :: Bool -- end of the program
     }
