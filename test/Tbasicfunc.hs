@@ -18,7 +18,6 @@ testBasicFunc = describe "\nTest all functions of BasicFunc file" $ do
     testCheckZero
     testPreDiv
     testPreMod
-    testFact
 
 testCheckFloatInt :: Spec
 testCheckFloatInt = describe "Test checkFloatInt function" $ do
@@ -37,27 +36,27 @@ testCheckFloatInt = describe "Test checkFloatInt function" $ do
     it "Test checkFloatInt with one element" $ do
         let test = checkFloatInt [SymbolAst "a"] [("a", IntegerAst 1)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right True"
     it "Test checkFloatInt with one element" $ do
         let test = checkFloatInt [SymbolAst "a"] [("a", FloatAst 1.0)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right True"
     it "Test checkFloatInt with one element" $ do
         let test = checkFloatInt [SymbolAst "a"] [("a", SymbolAst "b")]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\")]\""
     it "Test checkFloatInt with one element" $ do
         let test = checkFloatInt [SymbolAst "a"] [("a", SymbolAst "b"), ("b", IntegerAst 1)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",IntegerAst 1)]\""
     it "Test checkFloatInt with one element" $ do
         let test = checkFloatInt [SymbolAst "a"] [("a", SymbolAst "b"), ("b", FloatAst 1.0)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",FloatAst 1.0)]\""
     it "Test checkFloatInt with one element" $ do
         let test = checkFloatInt [SymbolAst "a"] [("a", SymbolAst "b"), ("b", SymbolAst "c")]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",SymbolAst \\\"c\\\")]\""
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [IntegerAst 1, IntegerAst 2] []
         let rest = show test
@@ -77,83 +76,83 @@ testCheckFloatInt = describe "Test checkFloatInt function" $ do
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [IntegerAst 1, SymbolAst "a"] [("a", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right True"
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [IntegerAst 1, SymbolAst "a"] [("a", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right True"
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [FloatAst 1.0, SymbolAst "a"] [("a", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right True"
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [FloatAst 1.0, SymbolAst "a"] [("a", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right True"
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b")]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\")]\""
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe`"Left \"The arg 'x' is not a number\""
+        rest `shouldBe`"Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",IntegerAst 2)]\""
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",FloatAst 2.0)]\""
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [FloatAst 1.0, SymbolAst "a"] [("a", SymbolAst "b")]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\")]\""
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [FloatAst 1.0, SymbolAst "a"] [("a", SymbolAst "b"), ("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",IntegerAst 2)]\""
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [FloatAst 1.0, SymbolAst "a"] [("a", SymbolAst "b"), ("b", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",FloatAst 2.0)]\""
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [SymbolAst "a", SymbolAst "b"] [("a", IntegerAst 1), ("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right True"
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [SymbolAst "a", SymbolAst "b"] [("a", IntegerAst 1), ("b", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right True"
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [SymbolAst "a", SymbolAst "b"] [("a", FloatAst 1.0), ("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right True"
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [SymbolAst "a", SymbolAst "b"] [("a", FloatAst 1.0), ("b", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right True"
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [SymbolAst "a", SymbolAst "b"] [("a", IntegerAst 1), ("b", SymbolAst "c")]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"c\\\" \\n env is [(\\\"a\\\",IntegerAst 1),(\\\"b\\\",SymbolAst \\\"c\\\")]\""
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [SymbolAst "a", SymbolAst "b"] [("a", IntegerAst 1), ("b", SymbolAst "c"), ("c", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"c\\\" \\n env is [(\\\"a\\\",IntegerAst 1),(\\\"b\\\",SymbolAst \\\"c\\\"),(\\\"c\\\",IntegerAst 2)]\""
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [SymbolAst "a", SymbolAst "b"] [("a", IntegerAst 1), ("b", SymbolAst "c"), ("c", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"c\\\" \\n env is [(\\\"a\\\",IntegerAst 1),(\\\"b\\\",SymbolAst \\\"c\\\"),(\\\"c\\\",FloatAst 2.0)]\""
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [SymbolAst "a", SymbolAst "b"] [("a", FloatAst 1.0), ("b", SymbolAst "c")]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"c\\\" \\n env is [(\\\"a\\\",FloatAst 1.0),(\\\"b\\\",SymbolAst \\\"c\\\")]\""
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [SymbolAst "a", SymbolAst "b"] [("a", FloatAst 1.0), ("b", SymbolAst "c"), ("c", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"c\\\" \\n env is [(\\\"a\\\",FloatAst 1.0),(\\\"b\\\",SymbolAst \\\"c\\\"),(\\\"c\\\",IntegerAst 2)]\""
     it "Test checkFloatInt with two elements" $ do
         let test = checkFloatInt [SymbolAst "a", SymbolAst "b"] [("a", FloatAst 1.0), ("b", SymbolAst "c"), ("c", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"c\\\" \\n env is [(\\\"a\\\",FloatAst 1.0),(\\\"b\\\",SymbolAst \\\"c\\\"),(\\\"c\\\",FloatAst 2.0)]\""
 
 testPreAdd :: Spec
 testPreAdd = describe "Test preAdd function" $ do
@@ -164,11 +163,11 @@ testPreAdd = describe "Test preAdd function" $ do
     it "Test preAdd with one element" $ do
         let test = preAdd [IntegerAst 1] []
         let rest = show test
-        rest `shouldBe` "Right (IntegerAst 1)"
+        rest `shouldBe` "Right (FloatAst 1.0)"
     it "Test preAdd with two elements int" $ do
         let test = preAdd [IntegerAst 1, IntegerAst 2] []
         let rest = show test
-        rest `shouldBe` "Right (IntegerAst 3)"
+        rest `shouldBe` "Right (FloatAst 3.0)"
     it "Test preAdd with two elements float" $ do
         let test = preAdd [FloatAst 10.51, FloatAst 1.01] []
         let rest = show test
@@ -176,43 +175,43 @@ testPreAdd = describe "Test preAdd function" $ do
     it "Test preAdd with two elements and one symbol int" $ do
         let test = preAdd [IntegerAst 1, SymbolAst "a"] [("a", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right (FloatAst 1.0)"
     it "Test preAdd with two elements and one symbol float" $ do
         let test = preAdd [FloatAst 1.01, SymbolAst "a"] [("a", FloatAst 2.99)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right (FloatAst 1.01)"
     it "Test preAdd with two elements and one symbol" $ do
         let test = preAdd [FloatAst (-1.01), SymbolAst "a"] [("a", FloatAst 0.01)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right (FloatAst (-1.01))"
     it "Test preAdd with two elements and one symbol" $ do
         let test = preAdd [IntegerAst 1, SymbolAst "a"] [("a", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right (FloatAst 1.0)"
     it "Test preAdd with two elements and one symbol" $ do
         let test = preAdd [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b")]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\")]\""
     it "Test preAdd with two elements and one symbol" $ do
         let test = preAdd [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",IntegerAst 2)]\""
     it "Test preAdd with two elements and one symbol" $ do
         let test = preAdd [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",FloatAst 2.0)]\""
     it "Test preAdd with two elements and one symbol" $ do
         let test = preAdd [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", SymbolAst "c")]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",SymbolAst \\\"c\\\")]\""
     it "Test symbol does not exist" $ do
         let test = preAdd [IntegerAst 1, SymbolAst "a"] [("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Symbol 'a' not found\""
     it "Test least one symbol does not exist" $ do
         let test = preAdd [IntegerAst 1] []
         let rest = show test
-        rest `shouldBe` "Right (IntegerAst 1)"
+        rest `shouldBe` "Right (FloatAst 1.0)"
 
 testPreSub :: Spec
 testPreSub = describe "Test preSub function" $ do
@@ -223,11 +222,11 @@ testPreSub = describe "Test preSub function" $ do
     it "Test preSub with one element" $ do
         let test = preSub [IntegerAst 1] []
         let rest = show test
-        rest `shouldBe` "Right (IntegerAst 1)"
+        rest `shouldBe` "Right (FloatAst 1.0)"
     it "Test preSub with two elements" $ do
         let test = preSub [IntegerAst 1, IntegerAst 2] []
         let rest = show test
-        rest `shouldBe` "Right (IntegerAst (-1))"
+        rest `shouldBe` "Right (FloatAst (-1.0))"
     it "Test preSub with two elements float" $ do
         let test = preSub [FloatAst 10.51, FloatAst 1.01] []
         let rest = show test
@@ -235,35 +234,35 @@ testPreSub = describe "Test preSub function" $ do
     it "Test preSub with two elements and one symbol int" $ do
         let test = preSub [IntegerAst 1, SymbolAst "a"] [("a", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right (FloatAst 1.0)"
     it "Test preSub with two elements and one symbol float" $ do
         let test = preSub [FloatAst 1.01, SymbolAst "a"] [("a", FloatAst 2.99)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right (FloatAst 1.01)"
     it "Test preSub with two elements and one symbol" $ do
         let test = preSub [FloatAst (-1.01), SymbolAst "a"] [("a", FloatAst 0.01)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right (FloatAst (-1.01))"
     it "Test preSub with two elements and one symbol" $ do
         let test = preSub [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b")]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\")]\""
     it "Test preSub with two elements and one symbol" $ do
         let test = preSub [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",IntegerAst 2)]\""
     it "Test preSub with two elements and one symbol" $ do
         let test = preSub [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",FloatAst 2.0)]\""
     it "Test preSub with two elements and one symbol" $ do
         let test = preSub [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", SymbolAst "c")]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",SymbolAst \\\"c\\\")]\""
     it "Test symbol does not exist" $ do
         let test = preSub [IntegerAst 1, SymbolAst "a"] [("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Symbol 'a' not found\""
 
 testPreMul :: Spec
 testPreMul = describe "Test preMul function" $ do
@@ -274,11 +273,11 @@ testPreMul = describe "Test preMul function" $ do
     it "Test preMul with one element" $ do
         let test = preMul [IntegerAst 1] []
         let rest = show test
-        rest `shouldBe` "Right (IntegerAst 1)"
+        rest `shouldBe` "Right (FloatAst 1.0)"
     it "Test preMul with two elements" $ do
         let test = preMul [IntegerAst 1, IntegerAst 2] []
         let rest = show test
-        rest `shouldBe` "Right (IntegerAst 2)"
+        rest `shouldBe` "Right (FloatAst 2.0)"
     it "Test preMul with two elements float" $ do
         let test = preMul [FloatAst 10.51, FloatAst 1.01] []
         let rest = show test
@@ -286,48 +285,48 @@ testPreMul = describe "Test preMul function" $ do
     it "Test preMul with two elements and one symbol int" $ do
         let test = preMul [IntegerAst 1, SymbolAst "a"] [("a", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right (FloatAst 1.0)"
     it "Test preMul with two elements and one symbol float" $ do
         let test = preMul [FloatAst 1.01, SymbolAst "a"] [("a", FloatAst 2.99)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right (FloatAst 1.01)"
     it "Test preMul with two elements and one symbol" $ do
         let test = preMul [FloatAst (-1.01), SymbolAst "a"] [("a", FloatAst 0.01)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right (FloatAst (-1.01))"
     it "Test preMul with two elements and one symbol" $ do
         let test = preMul [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b")]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\")]\""
     it "Test preMul with two elements and one symbol" $ do
         let test = preMul [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",IntegerAst 2)]\""
     it "Test preMul with two elements and one symbol" $ do
         let test = preMul [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",FloatAst 2.0)]\""
     it "Test preMul with two elements and one symbol" $ do
         let test = preMul [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", SymbolAst "c")]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",SymbolAst \\\"c\\\")]\""
     -- float
     it "Test preMul with two elements and one symbol" $ do
         let test = preMul [FloatAst 1.0, SymbolAst "a"] [("a", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right (FloatAst 1.0)"
     it "Test preMul with two elements and one symbol" $ do
         let test = preMul [FloatAst 1.0, SymbolAst "a"] [("a", SymbolAst "b")]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\")]\""
     it "Test preMul with two elements and one symbol" $ do
         let test = preMul [FloatAst 1.0, SymbolAst "a"] [("a", SymbolAst "b"), ("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",IntegerAst 2)]\""
     it "Test symbol does not exist" $ do
         let test = preMul [IntegerAst 1, SymbolAst "a"] [("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Symbol 'a' not found\""
 
 
 testCheckZero :: Spec
@@ -394,31 +393,31 @@ testPreDiv = describe "Test preDiv function" $ do
     it "Test preDiv with two elements" $ do
         let test = preDiv [IntegerAst 1, IntegerAst 2] []
         let rest = show test
-        rest `shouldBe` "Right (IntegerAst 0)"
+        rest `shouldBe` "Right (FloatAst 0.5)"
     it "Test preDiv with two elements and one symbol" $ do
         let test = preDiv [IntegerAst 1, SymbolAst "a"] [("a", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right (FloatAst 1.0)"
     it "Test preDiv with two elements and one symbol" $ do
         let test = preDiv [IntegerAst 1, SymbolAst "a"] [("a", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Right (FloatAst 1.0)"
     it "Test preDiv with two elements and one symbol" $ do
         let test = preDiv [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b")]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\")]\""
     it "Test preDiv with two elements and one symbol" $ do
         let test = preDiv [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",IntegerAst 2)]\""
     it "Test preDiv with two elements and one symbol" $ do
         let test = preDiv [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", FloatAst 2.0)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",FloatAst 2.0)]\""
     it "Test preDiv with two elements and one symbol" $ do
         let test = preDiv [IntegerAst 1, SymbolAst "a"] [("a", SymbolAst "b"), ("b", SymbolAst "c")]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe` "Left \"Not a numberSymbolAst \\\"b\\\" \\n env is [(\\\"a\\\",SymbolAst \\\"b\\\"),(\\\"b\\\",SymbolAst \\\"c\\\")]\""
     it "Test preDiv with too many arguments" $ do
         let test = preDiv [IntegerAst 1, SymbolAst "a", IntegerAst 2] [("a", SymbolAst "b"), ("b", FloatAst 2.0), ("c", FloatAst 2.0)]
         let rest = show test  
@@ -426,7 +425,7 @@ testPreDiv = describe "Test preDiv function" $ do
     it "Test symbol does not exist" $ do
         let test = preDiv [IntegerAst 1, SymbolAst "a"] [("b", IntegerAst 2)]
         let rest = show test
-        rest `shouldBe` "Left \"The arg 'x' is not a number\""
+        rest `shouldBe`"Left \"Symbol 'a' not found\""
  
 
 testPreMod :: Spec
@@ -479,23 +478,3 @@ testPreMod = describe "Test preMod function" $ do
         let test = preMod [IntegerAst 1, SymbolAst "a"] [("b", IntegerAst 2)]
         let rest = show test
         rest `shouldBe` "Left \"Mod function only works with integers\""
-    
-
-testFact :: Spec
-testFact = describe "Test fact function" $ do
-    it "Test fact with 0" $ do
-        let test = fact 0
-        let rest = show test
-        rest `shouldBe` "IntegerAst 1"
-    it "Test fact with 1" $ do
-        let test = fact 1
-        let rest = show test
-        rest `shouldBe` "IntegerAst 1"
-    it "Test fact with 2" $ do
-        let test = fact 2
-        let rest = show test
-        rest `shouldBe` "IntegerAst 2"
-    it "Test fact with 13" $ do
-        let test = fact 13
-        let rest = show test
-        rest `shouldBe` "IntegerAst 6227020800"

@@ -9,6 +9,7 @@ import Info
 import Parser
 import System.Exit
 import System.IO (isEOF)
+import Bytecode
 
 printAst :: Ast -> IO ()
 printAst ast = case ast of
@@ -29,6 +30,7 @@ someFuncGetLine env = do
         then return ()
     else do
         line <- getLine
+        -- putStrLn (show (runParser (parseCpt) line))
         case runParser (parseCpt) line of
                 Right (cpt, _) -> case cptToAst cpt of
                     Right ast -> case preEvalAst ast env of
@@ -41,17 +43,23 @@ someFuncGetLine env = do
                     Left err -> putStrLn ("Error : " ++ err) >> someFuncGetLine env
                 Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
 
-someFuncFile :: Env -> [String] -> IO()
-someFuncFile _ [] = return ()
-someFuncFile env (x:xs) = do
+printByteCode :: [String] -> IO()
+printByteCode [] = return ()
+printByteCode (x:xs) = do
+    putStrLn x
+    printByteCode xs
+
+someFuncFile :: Env -> [String] -> Stack -> IO()
+someFuncFile env [] stack = printByteCode (bytecode stack)
+someFuncFile env (x:xs) stack = do
     case runParser (parseCpt) x of
         Right (cpt, _) -> case cptToAst cpt of
             Right ast -> case preEvalAst ast env of
                 Right ast_s -> case evalAst ast_s env of
                     Right result -> case (fst result) of
-                        Empty -> someFuncFile (snd result) xs
-                        _ -> printAst (fst result) >> someFuncFile (snd result) xs
+                        Empty -> someFuncFile (snd result) xs (createByteCode ast (snd result) stack)
+                        _ -> printAst (fst result) >> putStrLn "FUCK" >> someFuncFile (snd result) xs (createByteCode ast_s (snd result) stack)
                     Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
                 Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
-            Left err -> putStrLn ("Error : " ++ err) >> someFuncFile env xs
+            Left err -> putStrLn ("Error : " ++ err) >> someFuncFile env xs stack
         Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
