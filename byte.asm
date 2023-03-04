@@ -1,1 +1,1 @@
-(define x (z 5 (+ 2 s)))
+(define x (z 5 2))

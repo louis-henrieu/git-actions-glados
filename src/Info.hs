@@ -54,5 +54,6 @@ module Info (
         global :: [String], --  global variables
         constValue :: [Ast], -- constants
         bytecode :: [String], -- final bytecode
-        end :: Bool -- end of the program
+        end :: Bool, -- end of the program
+        codeLine :: Int -- line of the code
     }

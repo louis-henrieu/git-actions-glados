@@ -6,7 +6,13 @@ def add(x, y):
 def sub(x, y):
     return x - y
 
+def call(x):
+    return add(x, 5) + sub(x, 5)
+
+def z(x, y):
+    return x + y
+
 def hello ():
-    x = z(5, (2 + s))
+    x = add(23, 3)
 
 dis.dis(hello)
