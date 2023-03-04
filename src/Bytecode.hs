@@ -170,18 +170,6 @@ module Bytecode (
                             Just s2 -> s2
                             Nothing -> error "Not implemented yet"
                     Nothing -> error "Not implemented yet"
-            --     Just post_stack -> case addFormulas post_stack xs of
-            --             Just final_stack -> case getToken x of
-            --                 Just s -> case loadFast (final_stack { bytecode = bytecode final_stack ++ [s] }) x of
-            --                     Just s2 -> s2
-            --                     Nothing -> error "Not implemented yet"
-            --                 Nothing -> case loadFast (final_stack { bytecode = bytecode final_stack ++ ["CALL_FUNCTION " ++ (show (length xs))] }) x of
-            --                     Just s2 -> s2
-            --                     Nothing -> error "Not implemented yet"
-            --             Nothing -> error "Not implemented yet"
-            --         Nothing -> error "Not implemented yet"
-            --     Nothing -> error "Not implemented yet"
-            -- Nothing -> error "Not implemented yet"
     createByteCode (Call (x : xs)) env stack = case checkSymbols xs of
         True -> error "Not implemented yet"
         False -> endByteCode stack
