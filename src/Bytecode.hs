@@ -82,7 +82,7 @@ module Bytecode (
     checkList :: a -> [a] -> Bool
     checkList _ [] = False
     checkList s (x : xs) = case s of
-        x -> True
+        st -> True
         _ -> checkList s xs
 
     createAstByteCode :: Ast -> Env -> Stack -> Stack

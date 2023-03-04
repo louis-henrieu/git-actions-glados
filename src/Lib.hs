@@ -25,8 +25,8 @@ printAst ast = case ast of
 
 someFuncGetLine :: Env -> IO()
 someFuncGetLine env = do
-    end <- isEOF
-    if end
+    endF <- isEOF
+    if endF
         then return ()
     else do
         line <- getLine
@@ -50,7 +50,7 @@ printByteCode (x:xs) = do
     printByteCode xs
 
 someFuncFile :: Env -> [String] -> Stack -> IO()
-someFuncFile env [] stack = case (end stack) of
+someFuncFile _ [] stack = case (end stack) of
     True ->  printByteCode (bytecode stack)
     False -> printByteCode ((bytecode stack) ++ ["LOAD_CONST 0", "RETURN_VALUE"]) >> exitWith ExitSuccess
 someFuncFile env (x:xs) stack = do
@@ -63,7 +63,7 @@ someFuncFile env (x:xs) stack = do
                         _ -> case (end (createByteCode ast (snd result) stack)) of
                             True -> someFuncFile (snd result) [] (createByteCode ast (snd result) (stack { codeLine = (codeLine stack) + 1 }))
                             False -> someFuncFile (snd result) xs (createByteCode ast (snd result) (stack { codeLine = (codeLine stack) + 1 }))
-                    Left err -> someFuncFile env xs (createByteCode ast env (stack { codeLine = (codeLine stack) + 1 }))
+                    Left err -> putStrLn("Error 1 : " ++ err) >> someFuncFile env xs (createByteCode ast env (stack { codeLine = (codeLine stack) + 1 }))
                 Left err -> putStrLn("Error 2 : " ++ err) >> exitWith (ExitFailure 84)
             Left err -> putStrLn ("Error 3 : " ++ err) >> someFuncFile env xs (stack { codeLine = (codeLine stack) + 1 })
         Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)

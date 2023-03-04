@@ -1,7 +1,6 @@
 module ByteWriter.Writer where
 
 import Data.ByteString as B
-import Data.ByteString.Char8 as C
 import Data.Word as W
 
 import Data.List.Split
