@@ -481,6 +481,10 @@ testPreMod = describe "Test preMod function" $ do
         let test = preMod [IntegerAst 1, SymbolAst "a"] [("b", IntegerAst 2)]
         let rest = show test
         rest `shouldBe` "Left \"There is at least one parameter that isn't an integer\""
+    it "two symbols without env" $ do
+        let test = preMod [SymbolAst "a", SymbolAst "b"] []
+        let rest = show test
+        rest `shouldBe` "Left \"There is at least one parameter that isn't an integer\""
 
 testPreSup :: Spec
 testPreSup = describe "Test preSup function" $ do
