@@ -1,1 +1,2 @@
-(define x (z 5 2))
+(define x (+ 3 4))
+(+ 2 3)

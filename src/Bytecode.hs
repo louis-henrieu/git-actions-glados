@@ -7,11 +7,12 @@ module Bytecode (
 
     comparators = ["<", ">", "<=", ">=", "==", "!="]
 
-    -- addByteCode :: Stack -> [String] -> Maybe Stack
-    -- addByteCode stack list = case length (bytecode stack) of
-    --     0 -> error "Should not be happening"
-    --     1 -> Just stack { bytecode = (last ([bytecode stack]) ++ init list) : (tail (list) : [""]) }
-    --     _ -> Just stack { bytecode = (init (bytecode stack)) ++ (last ([bytecode stack]) ++ init list) : (tail (list) : [""]) }
+    addByteCode :: Stack -> [String] -> Stack
+    addByteCode stack [] = stack
+    addByteCode stack (initList : list) = case length (bytecode stack) of
+        0 -> error "Should not be happening"
+        1 -> addByteCode (stack { bytecode = [(last (bytecode stack)) ++ initList, ""] }) list
+        _ -> addByteCode (stack { bytecode = (init (bytecode stack)) ++ [(last (bytecode stack)) ++ initList, ""] }) list
 
     getToken :: String -> Maybe String
     getToken "+" = Just "BINARY_ADD"
@@ -41,21 +42,18 @@ module Bytecode (
 
     loadFast :: Stack -> String -> Maybe Stack
     loadFast stack name = case getIndexListI name (fast stack) 0 of
-        Just i -> Just stack { bytecode = (init (bytecode stack)) ++ (last ([bytecode stack]))  ++ ["LOAD_FAST " ++ (show i), ""] }
-        Nothing -> Just stack { bytecode = (init (bytecode stack)) ++ (last ([bytecode stack])) ++ ["STORE_FAST " ++ (show (length (fast stack))), ""], fast = fast stack ++ [name]}
+        Just i -> Just (addByteCode stack ["LOAD_FAST " ++ (show i)])
+        Nothing -> Just (addByteCode (stack { fast = fast stack ++ [name] }) ["LOAD_FAST " ++ (show (length (fast stack))), "STORE_FAST " ++ (show (length (fast stack)))])
 
     loadConst :: Stack -> Ast -> Maybe Stack
     loadConst stack token = case getIndexListA token (constValue stack) 0 of
-        Just i -> Just stack { bytecode = (init (bytecode stack)) ++ (last ([bytecode stack]))  ++ ["LOAD_CONST " ++ (show i), ""] }
-        Nothing -> Just stack { bytecode = (init (bytecode stack)) ++ (last ([bytecode stack])) ++ ["LOAD_CONST " ++ (show (length (constValue stack) + 1)), ""], constValue = constValue stack ++ [token] }
+        Just i -> Just (addByteCode stack ["LOAD_CONST " ++ (show i)])
+        Nothing -> Just (addByteCode (stack { constValue = constValue stack ++ [token] }) ["LOAD_CONST " ++ (show (length (constValue stack))), "STORE_CONST " ++ (show (length (constValue stack)))])
 
     loadGlobal :: Stack -> String -> Maybe Stack
     loadGlobal stack name = case getIndexListI name (global stack) 0 of
-        Just i -> Just stack { bytecode = (init (bytecode stack)) ++ (last ([bytecode stack]))  ++ ["LOAD_GLOBAL " ++ (show i), ""] }
-        Nothing -> Just stack { bytecode = (init (bytecode stack)) ++ (last ([bytecode stack]))  ++ ["LOAD_GLOBAL " ++ (show (length (global stack))), ""], global = global stack ++ [name] }
-
-    endByteCode :: Stack -> Stack
-    endByteCode stack = stack { bytecode = (init (bytecode stack)) ++ (last ([bytecode stack]))  ++ ["LOAD_CONST 0", "RETURN_VALUE", ""], end = True }
+        Just i -> Just (addByteCode stack ["LOAD_GLOBAL " ++ (show i)])
+        Nothing -> Just (addByteCode (stack { global = global stack ++ [name] }) ["LOAD_GLOBAL " ++ (show (length (global stack))), "STORE_GLOBAL " ++ (show (length (global stack)))])
 
     checkSymbols :: [Ast] -> Bool
     checkSymbols [] = False
@@ -99,7 +97,7 @@ module Bytecode (
     createAstByteCode (IntegerAst i) env stack = case loadConst stack (IntegerAst i) of
         Just s2 -> s2
         _ -> error "Should not be happening 5"
-    createAstByteCode _ _ stack = endByteCode stack
+    createAstByteCode _ _ stack = addByteCode stack ["LOAD_CONST 0 (None)", "RETURN_VALUE"]
 
     preCreateCallByteCode :: [Ast] -> Env -> Stack -> Maybe Stack
     preCreateCallByteCode [] _ stack = Just stack
@@ -138,33 +136,33 @@ module Bytecode (
                     Nothing -> error "Not implemented yet"
                 Nothing -> error "Not implemented yet"
             Nothing -> error "Not implemented yet"
-    callByteCode _  _ stack = Just (endByteCode stack)
+    callByteCode _  _ stack = Just (addByteCode stack ["LOAD_CONST 0 (None)", "RETURN_VALUE"])
 
     createByteCode :: Ast -> Env -> Stack -> Stack
-    -- createByteCode (Define name ast) env stack = case ast of
-    --     SymbolAst s -> case checkList s (fast stack) of
-    --         True -> case (loadFast stack s) of
-    --             Just new_stack -> new_stack
-    --             Nothing -> error "Should not be happening"
-    --         False -> case (loadGlobal stack s) of
-    --             Just new_stack -> new_stack
-    --             Nothing -> error "Should not be happening"     
-    --     FloatAst f -> case (loadConst stack (FloatAst f)) of
-    --         Just new_stack -> new_stack
-    --         Nothing -> error "Should not be happening"
-    --     IntegerAst i -> case (loadConst stack (IntegerAst i)) of
-    --         Just new_stack -> new_stack
-    --         Nothing -> error "Should not be happening"
-    --     Call (SymbolAst x : xs) -> case callByteCode ast env stack of
-    --         Just new_stack -> new_stack
-    --         Nothing -> error "Should not be happening"
-    -- createByteCode (Call (SymbolAst x : xs)) env stack = case checkSymbols xs of
-    --     True -> case addFunction stack x of
-    --         Just newStack -> case preCreateCallByteCode xs env newStack of
-    --             Just postStack -> case addFormulas postStack xs of
-    --                 Just finalStack -> case getToken x of
-    --                     Just s -> finalStack { bytecode = (init (bytecode finalStack)) ++ (last ([bytecode finalStack])) ++ [s, "POP_TOP", ""] }
-    --                     Nothing -> finalStack { bytecode = (init (bytecode finalStack)) ++ (last ([bytecode finalStack])) ++ ["CALL_FUNCTION " ++ (show (length xs)), "POP_TOP", ""] }
-    --                 Nothing -> error "Not implemented yet"
-    --     False -> endByteCode stack
-    createByteCode _ _ stack = error (show ((bytecode stack)))
+    createByteCode (Define name ast) env stack = case ast of
+        SymbolAst s -> case checkList s (fast stack) of
+            True -> case (loadFast stack s) of
+                Just newStack -> newStack
+                Nothing -> error "Should not be happening"
+            False -> case (loadGlobal stack s) of
+                Just newStack -> newStack
+                Nothing -> error "Should not be happening"     
+        FloatAst f -> case (loadConst stack (FloatAst f)) of
+            Just newStack -> newStack
+            Nothing -> error "Should not be happening"
+        IntegerAst i -> case (loadConst stack (IntegerAst i)) of
+            Just newStack -> newStack
+            Nothing -> error "Should not be happening"
+        Call (SymbolAst x : xs) -> case callByteCode ast env stack of
+            Just newStack -> newStack
+            Nothing -> error "Should not be happening"
+    createByteCode (Call (SymbolAst x : xs)) env stack = case checkSymbols xs of
+        True -> case addFunction stack x of
+            Just newStack -> case preCreateCallByteCode xs env newStack of
+                Just postStack -> case addFormulas postStack xs of
+                    Just finalStack -> case getToken x of
+                        Just s -> finalStack { bytecode = (init (bytecode finalStack)) ++ (last ([bytecode finalStack])) ++ [s, "POP_TOP"] }
+                        Nothing -> finalStack { bytecode = (init (bytecode finalStack)) ++ (last ([bytecode finalStack])) ++ ["CALL_FUNCTION " ++ (show (length xs)), "POP_TOP"] }
+                    Nothing -> error "Not implemented yet"
+        False -> addByteCode stack ["LOAD_CONST 0 (None)", "RETURN_VALUE"]
+    createByteCode _ _ stack = addByteCode stack ["LOAD_CONST 0 (None)", "RETURN_VALUE"]
