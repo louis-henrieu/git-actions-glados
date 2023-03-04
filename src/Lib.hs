@@ -25,8 +25,8 @@ printAst ast = case ast of
 
 someFuncGetLine :: Env -> IO()
 someFuncGetLine env = do
-    end <- isEOF
-    if end
+    endF <- isEOF
+    if endF
         then return ()
     else do
         line <- getLine
@@ -50,16 +50,20 @@ printByteCode (x:xs) = do
     printByteCode xs
 
 someFuncFile :: Env -> [String] -> Stack -> IO()
-someFuncFile env [] stack = printByteCode (bytecode stack)
+someFuncFile _ [] stack = case (end stack) of
+    True ->  printByteCode (bytecode stack)
+    False -> printByteCode ((init (bytecode stack)) ++ ["LOAD_CONST 0", "RETURN_VALUE"]) >> exitWith ExitSuccess
 someFuncFile env (x:xs) stack = do
     case runParser (parseCpt) x of
         Right (cpt, _) -> case cptToAst cpt of
             Right ast -> case preEvalAst ast env of
                 Right ast_s -> case evalAst ast_s env of
                     Right result -> case (fst result) of
-                        Empty -> someFuncFile (snd result) xs (createByteCode ast (snd result) stack)
-                        _ -> printAst (fst result) >> putStrLn "FUCK" >> someFuncFile (snd result) xs (createByteCode ast_s (snd result) stack)
-                    Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
-                Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
-            Left err -> putStrLn ("Error : " ++ err) >> someFuncFile env xs stack
+                        Empty -> someFuncFile (snd result) xs (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
+                        _ -> case (end (createByteCode ast (snd result) stack)) of
+                            True -> someFuncFile (snd result) [] (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
+                            False -> someFuncFile (snd result) xs (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
+                    Left err -> putStrLn("Error 1 : " ++ err) >> someFuncFile env xs (createByteCode ast env (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
+                Left err -> putStrLn("Error 2 : " ++ err) >> exitWith (ExitFailure 84)
+            Left err -> putStrLn ("Error 3 : " ++ err) >> someFuncFile env xs (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 })
         Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)

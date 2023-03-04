@@ -123,6 +123,7 @@ testParsingList = describe "Test parsingList function" $ do
         let rest = show test
         rest `shouldBe` "Left \"Error in cptToAst: this is not a valid list\""
 
+
 testConvertArgs :: Spec
 testConvertArgs = describe "\t-- convertArgs --" $ do
     it "Simple Symbol no env" $ do

@@ -20,6 +20,7 @@ testBasicFunc = describe "\nTest all functions of BasicFunc file" $ do
     testPreMod
     testPreSup
     testPreInf
+    -- testFact
 
 testCheckFloatInt :: Spec
 testCheckFloatInt = describe "Test checkFloatInt function" $ do
@@ -578,3 +579,22 @@ testPreInf = describe "Test preInf function" $ do
     --    let test = preInf [SymbolAst "a", SymbolAst "b"] []
     --    let rest = show test
     --    rest `shouldBe` "Right (SymbolAst \"#t\")"
+
+-- testFact :: Spec
+-- testFact = describe "Test fact function" $ do
+--     it "Test fact with 0" $ do
+--         let test = fact 0
+--         let rest = show test
+--         rest `shouldBe` "IntegerAst 1"
+--     it "Test fact with 1" $ do
+--         let test = fact 1
+--         let rest = show test
+--         rest `shouldBe` "IntegerAst 1"
+--     it "Test fact with 2" $ do
+--         let test = fact 2
+--         let rest = show test
+--         rest `shouldBe` "IntegerAst 2"
+--     it "Test fact with 13" $ do
+--         let test = fact 13
+--         let rest = show test
+--         rest `shouldBe` "IntegerAst 6227020800"
