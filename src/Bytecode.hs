@@ -165,4 +165,4 @@ module Bytecode (
                         Nothing -> finalStack { bytecode = (init (bytecode finalStack)) ++ (last ([bytecode finalStack])) ++ ["CALL_FUNCTION " ++ (show (length xs)), "POP_TOP"] }
                     Nothing -> error "Not implemented yet"
         False -> addByteCode stack ["LOAD_CONST 0 (None)", "RETURN_VALUE"]
-    createByteCode _ _ stack = addByteCode stack ["LOAD_CONST 0 (None)", "RETURN_VALUE"]
+    createByteCode _ _ stack = addByteCode (stack {dualNum = dualNum stack + 2, end = True}) ["\t" ++ (show (dualNum stack)) ++ " LOAD_CONST 0 (None)", "\t" ++ (show (dualNum stack + 2)) ++ " RETURN_VALUE"]

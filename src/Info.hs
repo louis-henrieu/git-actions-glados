@@ -55,5 +55,6 @@ module Info (
         constValue :: [Ast], -- constants
         bytecode :: [String], -- final bytecode
         end :: Bool, -- end of the program
-        codeLine :: Int -- line of the code
-    }
+        codeLine :: Int, -- line of the code
+        dualNum :: Int -- number before instruction
+    } deriving (Show)
