@@ -20,6 +20,9 @@ module Bytecode (
     getToken "*" = Just "BINARY_MULTIPLY"
     getToken "/" = Just "BINARY_DIVIDE"
     getToken "%" = Just "BINARY_MODULO"
+    getToken token = if token `elem` comparators
+                    then Just "COMPARE_OP"
+                    else Nothing
     getToken _ = Nothing
 
     isEqual :: Ast -> Ast -> Bool
@@ -42,18 +45,28 @@ module Bytecode (
 
     loadFast :: Stack -> String -> Maybe Stack
     loadFast stack name = case getIndexListI name (fast stack) 0 of
-        Just i -> Just (addByteCode stack ["LOAD_FAST " ++ (show i)])
-        Nothing -> Just (addByteCode (stack { fast = fast stack ++ [name] }) ["LOAD_FAST " ++ (show (length (fast stack))), "STORE_FAST " ++ (show (length (fast stack)))])
+        Just i -> Just (addByteCode stack ["\t" ++ (show (dualNum stack)) ++ "\tLOAD_FAST " ++ (show i) ++ "\t(" ++ name ++ ")"])
+        Nothing -> Just (addByteCode (stack { fast = fast stack ++ [name], dualNum = dualNum stack + 2})  ["\t" ++ (show (dualNum stack)) ++ "\tSTORE_FAST " ++ (show (length (fast stack))) ++ "\t\t(" ++ name ++ ")"])
+
+    displayToken :: Ast -> String
+    displayToken (IntegerAst i) = show i
+    displayToken (FloatAst f) = if (f == fromIntegral (round f :: Integer)) then show (fromIntegral (round f :: Integer)) else show f
+    displayToken _ = error "Should not be happening"
 
     loadConst :: Stack -> Ast -> Maybe Stack
     loadConst stack token = case getIndexListA token (constValue stack) 0 of
-        Just i -> Just (addByteCode stack ["LOAD_CONST " ++ (show i)])
-        Nothing -> Just (addByteCode (stack { constValue = constValue stack ++ [token] }) ["LOAD_CONST " ++ (show (length (constValue stack))), "STORE_CONST " ++ (show (length (constValue stack)))])
+        Just i -> Just (addByteCode (stack {dualNum = dualNum stack + 2}) ["\t" ++ (show (dualNum stack)) ++ "\tLOAD_CONST " ++ (show i) ++ "\t\t(" ++ (displayToken token) ++ ")"])
+        Nothing -> Just (addByteCode (stack { constValue = constValue stack ++ [token], dualNum = dualNum stack + 2}) ["\t" ++ (show (dualNum stack)) ++ "\tLOAD_CONST " ++ (show (length (constValue stack))) ++ "\t\t(" ++ (displayToken token) ++ ")"])
 
     loadGlobal :: Stack -> String -> Maybe Stack
     loadGlobal stack name = case getIndexListI name (global stack) 0 of
-        Just i -> Just (addByteCode stack ["LOAD_GLOBAL " ++ (show i)])
-        Nothing -> Just (addByteCode (stack { global = global stack ++ [name] }) ["LOAD_GLOBAL " ++ (show (length (global stack))), "STORE_GLOBAL " ++ (show (length (global stack)))])
+        Just i -> Just (addByteCode (stack { dualNum = dualNum stack + 2 }) ["\t" ++ (show (dualNum)) ++ "\tLOAD_GLOBAL " ++ (show i) ++ "\t(" ++ name ++ ")"])
+        Nothing -> Just (addByteCode (stack { global = global stack ++ [name], dualNum = dualNum stack + 4 }) ["\t" ++ (show (dualNum stack)) ++ "\tSTORE_GLOBAL " ++ (show (length (global stack))) ++ "\t(" ++ name ++ ")", "\t" ++ (show (dualNum stack + 2)) ++ "\tLOAD_GLOBAL " ++ (show (length (global stack))) ++ "\t\t(" ++ name ++ ")"])
+    
+    compareOp :: Stack -> String -> Maybe Stack
+    compareOp stack op = case getIndexListI op comparators 0 of
+        Just i -> Just (addByteCode (stack { dualNum = dualNum stack + 2 }) ["\t" ++ (show (dualNum stack)) ++ "\tCOMPARE_OP " ++ (show i) ++ "\t\t(" ++ op ++ ")"])
+        Nothing -> Nothing
 
     checkSymbols :: [Ast] -> Bool
     checkSymbols [] = False
@@ -97,7 +110,7 @@ module Bytecode (
     createAstByteCode (IntegerAst i) env stack = case loadConst stack (IntegerAst i) of
         Just s2 -> s2
         _ -> error "Should not be happening 5"
-    createAstByteCode _ _ stack = addByteCode stack ["LOAD_CONST 0 (None)", "RETURN_VALUE"]
+    createAstByteCode _ _ stack = addByteCode stack ["LOAD_CONST 0\t\t(None)", "RETURN_VALUE"]
 
     preCreateCallByteCode :: [Ast] -> Env -> Stack -> Maybe Stack
     preCreateCallByteCode [] _ stack = Just stack
@@ -107,10 +120,12 @@ module Bytecode (
     addFormulas stack [] = Just stack
     addFormulas stack (x : xs) = case x of
         Call (SymbolAst y : ys) -> case (getToken y) of
-            Just s -> addFormulas stack { bytecode = (init (bytecode stack)) ++ (last ([bytecode stack])) ++ [s, ""] } xs
-            -- Just s -> addFormulas stack { bytecode = bytecode stack ++ [s] } xs
-            Nothing -> addFormulas stack { bytecode = (init (bytecode stack)) ++ (last ([bytecode stack])) ++ ["CALL_FUNCTION " ++ (show (length ys)), ""] } xs
+            Just s -> addFormulas stack { bytecode = (init (bytecode stack)) ++ ["\t" ++ (show (dualNum stack)) ++ "\t" ++ (last (bytecode stack)) ++ s, ""], dualNum = dualNum stack + 2 } xs
+            Nothing -> addFormulas stack { bytecode = (init (bytecode stack)) ++ ["\t" ++ (show (dualNum stack)) ++ "\t" ++ (last (bytecode stack)) ++ "CALL_FUNCTION " ++ (show (length ys)), ""], dualNum = dualNum stack + 2 } xs
         _ -> addFormulas stack xs
+
+    callFunctionByteCode :: Stack -> Int -> Stack
+    callFunctionByteCode stack nb_args = addByteCode (stack {dualNum = dualNum stack + 2}) ["\t" ++ (show (dualNum stack)) ++ " CALL_FUNCTION " ++ (show nb_args)]
 
     callByteCode :: Ast -> Env -> Stack -> Maybe Stack
     callByteCode (Call (SymbolAst x : xs)) env stack = case (getToken x) of
@@ -126,17 +141,13 @@ module Bytecode (
         Nothing -> case addFunction stack x of
             Just newStack -> case preCreateCallByteCode xs env newStack of
                 Just postStack -> case addFormulas postStack xs of
-                    Just finalStack -> case getToken x of
-                        Just s -> case loadFast (finalStack { bytecode = (init (bytecode finalStack)) ++ (last ([bytecode finalStack]))  ++ [s, ""] }) x of
-                            Just s2 -> Just s2
-                            Nothing -> error "Not implemented yet"
-                        Nothing -> case loadFast (finalStack { bytecode = (init (bytecode finalStack)) ++ (last ([bytecode finalStack])) ++ ["CALL_FUNCTION " ++ (show (length xs)), ""] }) x of
-                            Just s2 -> Just s2
-                            Nothing -> error "Not implemented yet"
+                    Just finalStack -> case (loadFast (callFunctionByteCode finalStack (length xs)) x) of
+                        Just s2 -> Just s2
+                        Nothing -> error "Not implemented yet"
                     Nothing -> error "Not implemented yet"
                 Nothing -> error "Not implemented yet"
             Nothing -> error "Not implemented yet"
-    callByteCode _  _ stack = Just (addByteCode stack ["LOAD_CONST 0 (None)", "RETURN_VALUE"])
+    callByteCode _  _ stack = Just (addByteCode (stack { dualNum = dualNum stack + 4, end = True }) ["\t" ++ (show (dualNum stack)) ++ " LOAD_CONST 0 (None)", "\t" ++ (show (dualNum stack + 2)) ++ " RETURN_VALUE"])
 
     createByteCode :: Ast -> Env -> Stack -> Stack
     createByteCode (Define name ast) env stack = case ast of
@@ -161,8 +172,8 @@ module Bytecode (
             Just newStack -> case preCreateCallByteCode xs env newStack of
                 Just postStack -> case addFormulas postStack xs of
                     Just finalStack -> case getToken x of
-                        Just s -> finalStack { bytecode = (init (bytecode finalStack)) ++ (last ([bytecode finalStack])) ++ [s, "POP_TOP"] }
-                        Nothing -> finalStack { bytecode = (init (bytecode finalStack)) ++ (last ([bytecode finalStack])) ++ ["CALL_FUNCTION " ++ (show (length xs)), "POP_TOP"] }
+                        Just s -> finalStack { bytecode = (["\t"] ++ [(show (dualNum stack))] ++ [" "] ++ init (bytecode finalStack)) ++ (last ([bytecode finalStack])) ++ [s, "\t" ++ (show (dualNum stack + 2)) ++ " POP_TOP"], dualNum = dualNum finalStack + 4 }
+                        Nothing -> finalStack { bytecode = (["\t"] ++ [(show (dualNum stack))] ++ [" "] ++ init (bytecode finalStack)) ++ (last ([bytecode finalStack])) ++ ["CALL_FUNCTION " ++ (show (length xs)), "\t" ++ (show (dualNum stack + 2)) ++ " POP_TOP"], dualNum = dualNum finalStack + 4 }
                     Nothing -> error "Not implemented yet"
-        False -> addByteCode stack ["LOAD_CONST 0 (None)", "RETURN_VALUE"]
-    createByteCode _ _ stack = addByteCode (stack {dualNum = dualNum stack + 2, end = True}) ["\t" ++ (show (dualNum stack)) ++ " LOAD_CONST 0 (None)", "\t" ++ (show (dualNum stack + 2)) ++ " RETURN_VALUE"]
+        False -> addByteCode (stack { dualNum = dualNum stack + 4, end = True }) ["\t" ++ (show (dualNum stack)) ++ " LOAD_CONST 0 (None)", "\t" ++ (show (dualNum stack + 2)) ++ " RETURN_VALUE"]
+    createByteCode _ _ stack = addByteCode (stack { dualNum = dualNum stack + 4, end = True } ) ["\t" ++ (show (dualNum stack)) ++ " LOAD_CONST 0\t\t(None)", "\t" ++ (show (dualNum stack + 2)) ++ " RETURN_VALUE"]
