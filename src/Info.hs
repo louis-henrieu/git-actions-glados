@@ -22,8 +22,9 @@ module Info (
         | Builtin ([Ast] -> Env -> Either String Ast)
         | Call [Ast]
         | Empty
-        deriving Show
+        deriving (Show)
 
+    
     --type Env =  String (Ast)
     type Env =  [(String ,Ast)]
 
@@ -48,6 +49,7 @@ module Info (
         else eraseDoubles xs (x:env)
     
     data Stack = Stack {
+        numFunctions :: Int, -- number of call_functions
         fast :: [String], -- local variables
         global :: [String], --  global variables
         constValue :: [Ast], -- constants

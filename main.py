@@ -7,7 +7,6 @@ def sub(x, y):
     return x - y
 
 def hello ():
-    s = 5
-    f = "-"
+    x = z(5, (2 + s))
 
 dis.dis(hello)
