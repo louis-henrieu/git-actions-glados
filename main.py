@@ -11,8 +11,9 @@ def call(x):
     return add(x, 5) + sub(x, 5)
 
 def z(x, y):
-    if 5 == 0:
-        5 + 5
+    x = 3
+    if 5 == x:
+        y
     else:
         5 - 5
 

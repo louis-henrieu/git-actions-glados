@@ -61,7 +61,7 @@ module Bytecode (
     loadGlobal :: Stack -> String -> Maybe Stack
     loadGlobal stack name = case getIndexListI name (global stack) 0 of
         Just i -> Just (addByteCode (stack { dualNum = dualNum stack + 2 }) ["\t" ++ (show (dualNum)) ++ "\tLOAD_GLOBAL " ++ (show i) ++ "\t(" ++ name ++ ")"])
-        Nothing -> Just (addByteCode (stack { global = global stack ++ [name], dualNum = dualNum stack + 4 }) ["\t" ++ (show (dualNum stack)) ++ "\tSTORE_GLOBAL " ++ (show (length (global stack))) ++ "\t(" ++ name ++ ")", "\t" ++ (show (dualNum stack + 2)) ++ "\tLOAD_GLOBAL " ++ (show (length (global stack))) ++ "\t\t(" ++ name ++ ")"])
+        Nothing -> Just (addByteCode (stack { global = global stack ++ [name], dualNum = dualNum stack + 4 }) ["\t" ++ (show (dualNum stack)) ++ "\tSTORE_GLOBAL " ++ (show (length (global stack))) ++ "\t\t(" ++ name ++ ")", "\t" ++ (show (dualNum stack + 2)) ++ "\tLOAD_GLOBAL " ++ (show (length (global stack))) ++ "\t\t(" ++ name ++ ")"])
     
     compareOp :: Stack -> String -> Maybe Stack
     compareOp stack op = case getIndexListI op comparators 0 of
@@ -133,9 +133,7 @@ module Bytecode (
             True -> error "Not implemented yet"
             False -> case evalAst (Call (SymbolAst x : xs)) env of
                 Right (ast, n_env) -> case loadConst stack ast of
-                    Just newStack -> case loadFast newStack x of
-                        Just newStack2 -> Just newStack2
-                        Nothing -> error "Should not be happening"
+                    Just newStack -> Just newStack
                     Nothing -> error "Should not be happening"
                 Left err -> error "Should not be happening"
         Nothing -> case addFunction stack x of
@@ -149,24 +147,76 @@ module Bytecode (
             Nothing -> error "Not implemented yet"
     callByteCode _  _ stack = Just (addByteCode (stack { dualNum = dualNum stack + 4, end = True }) ["\t" ++ (show (dualNum stack)) ++ " LOAD_CONST 0 (None)", "\t" ++ (show (dualNum stack + 2)) ++ " RETURN_VALUE"])
 
-    createByteCode :: Ast -> Env -> Stack -> Stack
-    createByteCode (Define name ast) env stack = case ast of
-        SymbolAst s -> case checkList s (fast stack) of
-            True -> case (loadFast stack s) of
-                Just newStack -> newStack
-                Nothing -> error "Should not be happening"
-            False -> case (loadGlobal stack s) of
-                Just newStack -> newStack
-                Nothing -> error "Should not be happening"     
-        FloatAst f -> case (loadConst stack (FloatAst f)) of
-            Just newStack -> newStack
+    symbolByteCode :: Ast -> Env -> Stack -> Maybe Stack
+    symbolByteCode (SymbolAst s) env stack = case checkList s (fast stack) of
+        True -> case loadFast stack s of
+            Just newStack -> Just newStack
             Nothing -> error "Should not be happening"
-        IntegerAst i -> case (loadConst stack (IntegerAst i)) of
-            Just newStack -> newStack
+        False -> case (loadGlobal stack s) of
+            Just newStack -> Just newStack
+            Nothing -> error "Should not be happening"
+    symbolByteCode _ _ _ = error "Should not be happening"
+
+    constByteCode :: Ast -> Env -> Stack -> Maybe Stack
+    constByteCode (FloatAst f) env stack = case loadConst stack (FloatAst f) of
+        Just s2 -> Just s2
+        _ -> error "Should not be happening"
+    constByteCode (IntegerAst i) env stack = case loadConst stack (IntegerAst i) of
+        Just s2 -> Just s2
+        _ -> error "Should not be happening"
+
+    
+    defineByteCode :: Ast -> Env -> Stack -> Maybe Stack
+    defineByteCode (Define name ast) env stack = case ast of
+        SymbolAst s -> case symbolByteCode ast env stack of
+            Just newStack -> Just newStack
+            Nothing -> error "Should not be happening" 
+        FloatAst f -> case constByteCode ast env stack of
+            Just newStack -> Just newStack
+            Nothing -> error "Should not be happening"
+        IntegerAst i -> case constByteCode ast env stack of
+            Just newStack -> Just newStack
             Nothing -> error "Should not be happening"
         Call (SymbolAst x : xs) -> case callByteCode ast env stack of
-            Just newStack -> newStack
+            Just newStack -> Just newStack
             Nothing -> error "Should not be happening"
+        _ -> error "Should not be happening"
+    defineByteCode _ _ _ = error "Should not be happening"
+    
+    evalTrueCond :: Ast -> Env -> Stack -> Maybe Stack
+    evalTrueCond (Define name ast) env stack = case defineByteCode (Define name ast) env stack of
+        Just newStack -> Just newStack
+        Nothing -> error "Should not be happening"
+    evalTrueCond (Call (SymbolAst x : xs )) env stack = case getToken x of
+        Just s -> Just stack
+        Nothing -> case callByteCode (Call ( SymbolAst x : xs )) env stack of
+            Just newStack -> Just newStack
+            Nothing -> error "Should not be happening"
+    evalTrueCond _ _ stack = Just stack
+
+    calculateJump :: Int -> [String] -> [String] -> Int
+    calculateJump nb1 [] [] = nb1
+    calculateJump nb1 bytecode1 bytecode2 = nb1 + ((length bytecode2 - length bytecode1) * 2) + 4
+
+    ifByteCode :: Ast -> Env -> Stack -> Stack
+    ifByteCode (If cond true false) env stack = case cond of
+        SymbolAst s -> case symbolByteCode cond env stack of
+            Just newStack -> case evalTrueCond true env newStack of
+                Just newStack2 -> case evalTrueCond true env (addByteCode (newStack {dualNum = dualNum newStack + 2}) ["\t" ++ (show (dualNum newStack)) ++ "\tPOP_JUMP_IF_FALSE " ++ (show (calculateJump (dualNum newStack) (bytecode newStack) (bytecode newStack2)))]) of
+                    Just newStack3 -> case evalTrueCond false env (addByteCode (newStack3 {dualNum = dualNum newStack3 + 2}) ["\t" ++ show (dualNum newStack3) ++ "\tJUMP_FORWARD 0\t\t(to " ++ (show (dualNum newStack3 + 2)) ++ ")"]) of
+                        Just newStack4 -> newStack4
+                        Nothing -> error "Should not be happening"
+                    Nothing -> error "Should not be happening"
+            Nothing -> error "Should not be happening"
+        -- IntegerAst i
+        -- FloatAst f
+        -- Call x
+    ifByteCode _ _ _ = error "Should not be happening"
+
+    createByteCode :: Ast -> Env -> Stack -> Stack
+    createByteCode (Define name ast) env stack = case defineByteCode (Define name ast) env stack of
+        Just newStack -> newStack
+        Nothing -> error "Should not be happening"
     createByteCode (Call (SymbolAst x : xs)) env stack = case checkSymbols xs of
         True -> case addFunction stack x of
             Just newStack -> case preCreateCallByteCode xs env newStack of
@@ -176,4 +226,5 @@ module Bytecode (
                         Nothing -> finalStack { bytecode = (["\t"] ++ [(show (dualNum stack))] ++ [" "] ++ init (bytecode finalStack)) ++ (last ([bytecode finalStack])) ++ ["CALL_FUNCTION " ++ (show (length xs)), "\t" ++ (show (dualNum stack + 2)) ++ " POP_TOP"], dualNum = dualNum finalStack + 4 }
                     Nothing -> error "Not implemented yet"
         False -> addByteCode (stack { dualNum = dualNum stack + 4, end = True }) ["\t" ++ (show (dualNum stack)) ++ " LOAD_CONST 0 (None)", "\t" ++ (show (dualNum stack + 2)) ++ " RETURN_VALUE"]
+    createByteCode (If cond true false) env stack = ifByteCode (If cond true false) env stack
     createByteCode _ _ stack = addByteCode (stack { dualNum = dualNum stack + 4, end = True } ) ["\t" ++ (show (dualNum stack)) ++ " LOAD_CONST 0\t\t(None)", "\t" ++ (show (dualNum stack + 2)) ++ " RETURN_VALUE"]
