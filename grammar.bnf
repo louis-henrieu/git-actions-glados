@@ -1,0 +1,87 @@
+glados      ::= stmt_list
+
+stmt_list   ::= stmt stmt_list
+              | stmt
+
+stmt        ::= var_assign
+              | func_decl
+              | func_call
+              | if_expr
+              | case_of
+              | expr
+
+var_assign  ::= ident "->" expr
+
+func_decl   ::= ident params "->" expr
+
+params      ::= " " param_list " "
+              | "" 
+
+param_list  ::= ident " " param_list
+              | ident
+
+func_call   ::= ident func_args
+
+func_args   ::= "(" arg_list ")"
+              | ""
+
+arg_list  ::= expr "," arg_list
+              | expr
+
+if_expr   ::= "Siii" expr expr expr
+
+case_of   ::= "Prrr" ident "of" case_list
+
+case_list ::= "[" case "]" 
+              | "[" case "," case_list "]"
+
+case      ::= pattern "->" expr
+
+pattern   ::= ident
+              | "_"
+
+expr      ::= term add_op expr
+              | term
+
+term      ::= factor mult_op term
+              | factor
+
+factor    ::= int_lit
+              | float_lit
+              | string_lit
+              | bool_lit
+              | ident
+              | expr
+              | func_call
+              | if_expr
+              | case_of
+
+add_op    ::= "+"
+              | "-"
+
+mult_op   ::= "*"
+              | "/"
+              | "mod"
+
+int_lit   ::= digit+
+
+float_lit ::= digit+ "." digit+
+
+string_lit::= '"' char* '"'
+bool_lit  ::= "True"
+              | "False"
+
+ident     ::= alpha alphanum*
+
+alpha     ::= "a" | "b" | ... | "z" | "A" | "B" | ... | "Z"
+
+alphanum  ::= alpha | digit
+
+digit     ::= "0" | "1" | ... | "9"
+
+# The following are not part of the language, but are used to make the grammar more readable.
+# They are used to indicate that the token is a keyword, and not an identifier.
+
+# Cette BNF décrit la grammaire de notre langage en utilisant des symboles non-terminaux tels que glados, stmt_list, stmt, var_assign, func_decl, params, param_list, func_call, func_args, arg_list, if_expr, case_of, case_list, case, pattern, expr, term, factor, add_op, mult_op, int_lit, float_lit, string_lit, bool_lit, et ident. 
+#Les symboles terminaux sont les éléments concrets de notre langage, tels que les opérateurs, les littéraux de chaînes de caractères et les mots-clés.
+# En utilisant cette BNF, vous pouvez construire des programmes valides en suivant les règles de la grammaire.
