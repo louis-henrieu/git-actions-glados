@@ -20,7 +20,13 @@ extra-source-files:
 description:         Please see the README on GitHub at <https://github.com/githubuser/glados#readme>
 
 dependencies:
-- base >= 4.7 && < 5
+- base >=4 && <5
+- split >=0.2
+- bytestring >= 0.11
+- containers >=0.6
+- data-binary-ieee754 ==0.4.4
+- binary ==0.8.9.0
+#- blip ==0.2.1
 
 ghc-options:
 - -Wall
@@ -46,6 +52,12 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - glados
+    - split
+    - containers
+    - bytestring
+    - binary
+    - data-binary-ieee754
+    #- blip
 
 tests:
   glados-test:

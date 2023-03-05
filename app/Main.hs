@@ -3,6 +3,7 @@ module Main (main) where
 import Lib
 import Env
 import System.Environment
+import Stack
 
 parseFile :: String -> Int -> String -> [String] -> [String]
 parseFile [] 0 [] file = file
@@ -29,5 +30,5 @@ main = do
             someFuncGetLine envStorage
         1 -> do
             file <- readFile (head args)
-            someFuncFile envStorage (parseFile file 0 [] [])
+            someFuncFile envStorage (parseFile file 0 [] []) initStack
         _ -> error "Invalid arguments"

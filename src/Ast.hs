@@ -86,5 +86,5 @@ module Ast (
         Left err -> error (show err)
         Right res -> Right (res, env)
     evalAst (Call (ArgsLambda (x, y) : z)) env = lambdaFunc x y z env
-    evalAst (Builtin _) env = Right (SymbolAst"#<procedure>", env)
+    evalAst (Builtin _) env = Right (SymbolAst"#<procedure>", env) 
     evalAst ast _ = error("The ast is : " ++ show(ast))
