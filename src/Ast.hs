@@ -1,8 +1,4 @@
 module Ast (
-    checkOnlySymbols,
-    parsingDefine,
-    parsingList,
-    cptToAst,
     convertArgs,
     preEvalAst,
     evalAst
@@ -11,40 +7,6 @@ module Ast (
     import Info
     import Env
     import Define
-
-    transFromListString :: [Cpt] -> [String]
-    transFromListString [] = []
-    transFromListString (x : xs) = case x of
-        Symbol s -> s : transFromListString xs
-        _ -> error "Holala ! Error in transFromListString"
-
-    checkPrrr :: [Cpt] -> Ast
-    checkPrrr [] = []
-    checkPrrr (List (x : xs)) = case length x of
-        2 -> 
-
-    parseList :: Cpt -> Ast
-    parseList (List (Symbol x : Symbol ">" : y : xs)) = case length (y : xs) of
-        1 -> Define x (cptToAst y)
-        _ -> error "Holala ! Only one argument is allowed in define"
-    parseList (List (List x : Symbol ">" : y : xs)) = case length (y : xs) of
-        1 -> Lambda (transFromListString x) (cptToAst y)
-        _ -> error "Holala ! Only one argument is allowed in define"
-    parseList (List (Symbol "Siii" : x : y : xs)) = case length (xs) of
-        1 -> If (cptToAst x) (cptToAst y) (cptToAst (head xs))
-        _ -> error "Holala ! Only three arguments is allowed for a Siii statement"
-    parseList (List (Symbol "Prrr" : List x)) = checkPrrr x
-    parseList (List (Symbol "UnDeux" : Symbol "Yupi" : x : Symbol "Oulah" : xs)) = case length xs of
-        1 -> Either (cptToAst x) (cptToAst (head xs))
-        _ -> error "Holala ! Only two arguments is allowed for a UnDeux statement"
-    parseList _ = error "Holala ! Error in parseList"
-
-    cptToAst :: Cpt -> Ast
-    cptToAst (NumberFloat f) = FloatAst f
-    cptToAst (Number n) = IntegerAst n
-    cptToAst (Symbol s) = SymbolAst s
-    cptToAst (List x) = parseList (List x)
-    cptToAst _ = error "Holala ! Error in cptToAst"
 
     convertArgs :: [Ast] -> Env -> [Ast]
     convertArgs [] _ = []
@@ -124,5 +86,5 @@ module Ast (
         Left err -> error (show err)
         Right res -> Right (res, env)
     evalAst (Call (ArgsLambda (x, y) : z)) env = lambdaFunc x y z env
-    evalAst (Builtin _) env = Right (SymbolAst"#<procedure>", env)
+    evalAst (Builtin _) env = Right (SymbolAst"#<procedure>", env) 
     evalAst ast _ = error("The ast is : " ++ show(ast))

@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.35.1.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 539e7839f47364492954366b8541a2a62aeb33b2d1d2705b05278776c323b5f1
+-- hash: d6111a452c737d3820f1ff08484479da917deda27851eb0495dd044437e5ebf8
 
 name:           glados
 version:        0.1.0.0
@@ -28,20 +28,33 @@ library
   exposed-modules:
       Ast
       BasicFunc
+      Bytecode
+      ByteWriter.ConvertTypeBS
+      ByteWriter.CoWriter
+      ByteWriter.ObjectWriter
+      ByteWriter.Writer
+      Compiler.SymboleResolution
       Cpt
+      CptAst
       Define
       Env
       Info
       Keywords
       Lib
       Parser
+      Stack
   other-modules:
       Paths_glados
   hs-source-dirs:
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
+      base ==4.*
+    , binary ==0.8.9.0
+    , bytestring >=0.11
+    , containers >=0.6
+    , data-binary-ieee754 ==0.4.4
+    , split >=0.2
   default-language: Haskell2010
 
 executable glados-exe
@@ -52,8 +65,13 @@ executable glados-exe
       app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      base ==4.*
+    , binary
+    , bytestring
+    , containers
+    , data-binary-ieee754
     , glados
+    , split
   default-language: Haskell2010
 
 test-suite glados-test
@@ -73,9 +91,14 @@ test-suite glados-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       QuickCheck
-    , base >=4.7 && <5
+    , base ==4.*
+    , binary ==0.8.9.0
+    , bytestring >=0.11
+    , containers >=0.6
+    , data-binary-ieee754 ==0.4.4
     , glados
     , hspec
     , hspec-contrib
     , hspec-hedgehog
+    , split >=0.2
   default-language: Haskell2010

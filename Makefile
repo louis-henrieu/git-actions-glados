@@ -38,7 +38,7 @@ re:				fclean all
 tests_run:
 				stack test --coverage
 				stack hpc report --all --destdir test/coverage
-#				microsoft-edge ./test/coverage/hpc_index.html
+				microsoft-edge ./test/coverage/hpc_index.html
 
 func_test:		re
 				cp -f ./test/$(FT_NAME) ./

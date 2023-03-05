@@ -1,6 +1,9 @@
 module Parser (
   parseCpt,
   runParser,
+  parseWhiteSpace,
+  parseAndWith,
+  parseMany,
 ) where
 
 import Control.Applicative
@@ -127,42 +130,50 @@ parseWhiteSpace = parseMany (parseChar ' ')
 isClosingParenthesis :: String -> Bool
 isClosingParenthesis [] = False
 isClosingParenthesis (x : xs) = case x of
-  ')' -> True
+  ']' -> True
   _ -> isClosingParenthesis xs
 
 beforeClosingParenthesis :: String -> String -> String
 beforeClosingParenthesis [] _ = error "Error beforeClosingParenthesis"
 beforeClosingParenthesis (x : xs) s = case x of
-  ')' -> s
+  ']' -> s
   _ -> beforeClosingParenthesis xs (s ++ [x])
 
 afterClosingParenthesis :: String -> String
 afterClosingParenthesis [] = error "Error afterClosingParenthesis"
 afterClosingParenthesis (x : xs) = case x of
-  ')' -> xs
+  ']' -> xs
   _ -> afterClosingParenthesis xs
 
 parseList :: Parser a -> Parser [a]
 parseList p =
   Parser
     ( \s -> case runParser (parseChar '[') s of
-        Right (_, s') -> case runParser (parseMany (parseAndWith (,) p parseWhiteSpace)) s' of
+        Right (_, s') -> case runParser (parseWhiteSpace *> parseMany (parseAndWith (,) p parseWhiteSpace)) s' of
           Right (as, s'') -> case runParser (parseChar ']') s'' of
             Right (_, s''') -> Right (map fst as, s''')
             Left (_) -> case isClosingParenthesis s'' of
-              True -> case runParser p (beforeClosingParenthesis s'' "") of
-                Right (a, s''') -> Right ((map fst as) ++ [a], afterClosingParenthesis s''')
-                Left (_) -> Left ("Error ParseList - Invalid Parser argument")
-              False -> Left ("Error ParseList - no closing parenthesis in : " ++ s'')
+              True -> Right (map fst as, beforeClosingParenthesis s'' "")
+              False -> Left ("Error ParseList - no closing parenthesis in : \'" ++ s ++ "\'")
           Left (_) -> Left ("Error ParseList - Invalid Parser argument 2")
         Left (_) -> Left ("Error ParseList - no opening parenthesis in : \'" ++ s ++ "\'")
     )
 
 parseLiteral :: Parser String
-parseLiteral = parseChar "\"" *> parseSome (parseAnyChar ['a' .. 'z'] <|>  parseAnyChar ['A' .. 'Z']) <* parseChar "\""
+parseLiteral = parseChar '\"' *> parseSome (parseAnyChar ['a' .. 'z'] <|>  parseAnyChar ['A' .. 'Z']) <* parseChar '\"'
 
 parseString :: Parser String
 parseString = parseSome (parseAnyChar ['a' .. 'z'] <|>  parseAnyChar ['A' .. 'Z'] <|> parseAnyChar ['0' .. '9'] <|> parseAnyChar "?!+-*/%=<>#")
 
+parseSeparator :: Parser String
+parseSeparator = 
+  Parser (
+    \s -> case runParser (parseChar '=') s of
+      Right (_, s') -> case runParser (parseChar '>') s' of
+        Right (_, s'') -> Right ("=>", s'')
+        Left (_) -> Left ("Error ParseSeparator")
+      Left (_) -> Left ("Error ParseSeparator")
+  )
+
 parseCpt :: Parser Cpt
-parseCpt = (NumberFloat <$> parseFloat) <|> (List <$> parseList parseCpt) <|> (Symbol <$> parseString)
+parseCpt = (Separator <$> (parseSeparator)) <|> (NumberFloat <$> parseFloat) <|> (List <$> parseList parseCpt) <|> (Symbol <$> parseString)

@@ -21,6 +21,7 @@ testEnv = describe "\nTest all functions of Env file" $ do
     testUpdateEnv
     testReplaceEnv
     testUpdateAllEnv
+    testReplaceAllEnv
     testPrintAllEnv
 
 testEnvStorage :: Spec
@@ -42,6 +43,12 @@ testUpdateEnv = describe "-- updateEnv --" $ do
         let test = updateEnv "apit" (IntegerAst 5) [("apit", (IntegerAst 10))]
         let rest = show test
         rest `shouldBe` "[(\"apit\",IntegerAst 5),(\"apit\",IntegerAst 10)]"
+    it "update symbol ast left" $ do
+        let tEmpty = envStorage
+        let test = updateEnv "apit" (SymbolAst "apit") [("tre", (IntegerAst 10))]
+        let rest = show test
+        rest `shouldBe` "[(\"apit\",SymbolAst \"apit\"),(\"tre\",IntegerAst 10)]"
+
 
 testReplaceEnv :: Spec
 testReplaceEnv = describe "-- replaceEnv --" $ do
@@ -76,6 +83,34 @@ testUpdateAllEnv = describe "-- updateAllEnv --" $ do
         let test = updateAllEnv ["apit", "apit2"] [(IntegerAst 5), (IntegerAst 10)] envStorage
         let rest = show test
         rest `shouldBe` "[(\"apit2\",IntegerAst 10),(\"apit\",IntegerAst 5),(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>),(\"<\",Builtin <function>),(\">\",Builtin <function>)]"
+    it "no env" $ do
+        let test = updateAllEnv ["apit", "apit2"] [(IntegerAst 5), (IntegerAst 10)] []
+        let rest = show test
+        rest `shouldBe` "[(\"apit2\",IntegerAst 10),(\"apit\",IntegerAst 5)]"
+    it "all empty" $ do
+        let test = updateAllEnv [] [] []
+        let rest = show test
+        rest `shouldBe` "[]"
+
+
+testReplaceAllEnv :: Spec
+testReplaceAllEnv = describe "-- replaceAllEnv --" $ do
+    it "empty" $ do
+        let test = replaceAllEnv [] [] envStorage
+        let rest = show test
+        rest `shouldBe` "[(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>),(\"<\",Builtin <function>),(\">\",Builtin <function>)]"
+    it "new env" $ do
+        let test = replaceAllEnv ["apit", "apit2"] [(IntegerAst 5), (IntegerAst 10)] envStorage
+        let rest = show test
+        rest `shouldBe` "[(\"+\",Builtin <function>),(\"add\",Builtin <function>),(\"-\",Builtin <function>),(\"sub\",Builtin <function>),(\"*\",Builtin <function>),(\"mul\",Builtin <function>),(\"/\",Builtin <function>),(\"div\",Builtin <function>),(\"mod\",Builtin <function>),(\"eq?\",Builtin <function>),(\"==\",Builtin <function>),(\"<\",Builtin <function>),(\">\",Builtin <function>)]"
+    it "no env" $ do
+        let test = replaceAllEnv ["apit", "apit2"] [(IntegerAst 5), (IntegerAst 10)] []
+        let rest = show test
+        rest `shouldBe` "[]"
+    it "all empty" $ do
+        let test = replaceAllEnv [] [] []
+        let rest = show test
+        rest `shouldBe` "[]"
 
 testPrintAllEnv :: Spec
 testPrintAllEnv = describe "-- printAllEnv --" $ do
