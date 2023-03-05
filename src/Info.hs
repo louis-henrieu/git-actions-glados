@@ -18,6 +18,7 @@ module Info (
         | SymbolAst String
         | Lambda [String] Ast
         | If Ast Ast Ast
+        | While Ast Ast
         | ArgsLambda ([String], Ast)
         | Builtin ([Ast] -> Env -> Either String Ast)
         | Call [Ast]
