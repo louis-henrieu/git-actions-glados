@@ -40,15 +40,6 @@ instance Alternative Parser where
             Left err2 -> Left (err ++ "\n" ++ err2)
           Right res1 -> Right res1
       )
-    
-instance Monad Parser where
-  return = pure
-  pa >>= f =
-    Parser
-      ( \s -> case runParser pa s of
-          Left err -> Left err
-          Right (a, rs) -> runParser (f a) rs
-      )
 
 parseChar :: Char -> Parser Char
 parseChar c =
@@ -145,9 +136,9 @@ afterClosingParenthesis (x : xs) = case x of
 parseList :: Parser a -> Parser [a]
 parseList p =
   Parser
-    ( \s -> case runParser (parseChar '[') s of
+    ( \s -> case runParser (parseChar '(') s of
         Right (_, s') -> case runParser (parseMany (parseAndWith (,) p parseWhiteSpace)) s' of
-          Right (as, s'') -> case runParser (parseChar ']') s'' of
+          Right (as, s'') -> case runParser (parseChar ')') s'' of
             Right (_, s''') -> Right (map fst as, s''')
             Left (_) -> case isClosingParenthesis s'' of
               True -> case runParser p (beforeClosingParenthesis s'' "") of
@@ -157,9 +148,6 @@ parseList p =
           Left (_) -> Left ("Error ParseList - Invalid Parser argument 2")
         Left (_) -> Left ("Error ParseList - no opening parenthesis in : \'" ++ s ++ "\'")
     )
-
-parseLiteral :: Parser String
-parseLiteral = parseChar "\"" *> parseSome (parseAnyChar ['a' .. 'z'] <|>  parseAnyChar ['A' .. 'Z']) <* parseChar "\""
 
 parseString :: Parser String
 parseString = parseSome (parseAnyChar ['a' .. 'z'] <|>  parseAnyChar ['A' .. 'Z'] <|> parseAnyChar ['0' .. '9'] <|> parseAnyChar "?!+-*/%=<>#")

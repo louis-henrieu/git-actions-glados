@@ -9,6 +9,7 @@ import Info
 import Parser
 import System.Exit
 import System.IO (isEOF)
+import Bytecode
 
 printAst :: Ast -> IO ()
 printAst ast = case ast of
@@ -24,11 +25,12 @@ printAst ast = case ast of
 
 someFuncGetLine :: Env -> IO()
 someFuncGetLine env = do
-    end <- isEOF
-    if end
+    endF <- isEOF
+    if endF
         then return ()
     else do
         line <- getLine
+        -- putStrLn (show (runParser (parseCpt) line))
         case runParser (parseCpt) line of
                 Right (cpt, _) -> case cptToAst cpt of
                     Right ast -> case preEvalAst ast env of
@@ -41,17 +43,28 @@ someFuncGetLine env = do
                     Left err -> putStrLn ("Error : " ++ err) >> someFuncGetLine env
                 Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
 
-someFuncFile :: Env -> [String] -> IO()
-someFuncFile _ [] = return ()
-someFuncFile env (x:xs) = do
+printByteCode :: [String] -> IO()
+printByteCode [] = return ()
+printByteCode (x:xs) = do
+    putStrLn x
+    printByteCode xs
+
+someFuncFile :: Env -> [String] -> Stack -> IO()
+someFuncFile _ [] stack = case (end stack) of
+    True ->  printByteCode (init (bytecode stack))
+    -- False -> error (show (bytecode stack))
+    False -> printByteCode ((init (bytecode stack)) ++ ["\t" ++ (show (dualNum stack)) ++ "\tLOAD_CONST 0\t\t(None)", "\t" ++ (show (dualNum stack + 2)) ++ "\tRETURN_VALUE"]) >> exitWith ExitSuccess
+someFuncFile env (x:xs) stack = do
     case runParser (parseCpt) x of
         Right (cpt, _) -> case cptToAst cpt of
             Right ast -> case preEvalAst ast env of
                 Right ast_s -> case evalAst ast_s env of
                     Right result -> case (fst result) of
-                        Empty -> someFuncFile (snd result) xs
-                        _ -> printAst (fst result) >> someFuncFile (snd result) xs
-                    Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
-                Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
-            Left err -> putStrLn ("Error : " ++ err) >> someFuncFile env xs
+                        Empty -> someFuncFile (snd result) xs (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
+                        _ -> case (end (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))) of
+                            True -> someFuncFile (snd result) [] (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
+                            False -> someFuncFile (snd result) xs (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
+                    Left err -> putStrLn("Error 1 : " ++ err) >> someFuncFile env xs (createByteCode ast env (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
+                Left err -> putStrLn("Error 2 : " ++ err) >> exitWith (ExitFailure 84)
+            Left err -> putStrLn ("Error 3 : " ++ err) >> someFuncFile env xs (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 })
         Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)

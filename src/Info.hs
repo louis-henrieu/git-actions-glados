@@ -3,7 +3,8 @@ module Info (
     Env,
     getValueEnv,
     checkIfEmpty,
-    eraseDoubles
+    eraseDoubles,
+    Stack(..),
     ) where
     import Prelude hiding (lookup)
     import Prelude hiding (lookup)
@@ -17,14 +18,14 @@ module Info (
         | SymbolAst String
         | Lambda [String] Ast
         | If Ast Ast Ast
-        | Either Ast Ast
+        | While Ast Ast
         | ArgsLambda ([String], Ast)
         | Builtin ([Ast] -> Env -> Either String Ast)
         | Call [Ast]
-        | Case Ast [(Ast, Ast)]
         | Empty
-        deriving Show
+        deriving (Show)
 
+    
     --type Env =  String (Ast)
     type Env =  [(String ,Ast)]
 
@@ -47,3 +48,14 @@ module Info (
     eraseDoubles (x:xs) env = if (fst x) `elem` (map fst env)
         then eraseDoubles xs env
         else eraseDoubles xs (x:env)
+    
+    data Stack = Stack {
+        numFunctions :: Int, -- number of call_functions
+        fast :: [String], -- local variables
+        global :: [String], --  global variables
+        constValue :: [Ast], -- constants
+        bytecode :: [String], -- final bytecode
+        end :: Bool, -- end of the program
+        codeLine :: Int, -- line of the code
+        dualNum :: Int -- number before instruction
+    } deriving (Show)
