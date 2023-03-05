@@ -35,6 +35,7 @@ library
       ByteWriter.Writer
       Compiler.SymboleResolution
       Cpt
+      CptAst
       Define
       Env
       Info

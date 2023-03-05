@@ -3,8 +3,7 @@ module Info (
     Env,
     getValueEnv,
     checkIfEmpty,
-    eraseDoubles,
-    Stack(..),
+    eraseDoubles
     ) where
     import Prelude hiding (lookup)
     import Prelude hiding (lookup)
@@ -18,13 +17,14 @@ module Info (
         | SymbolAst String
         | Lambda [String] Ast
         | If Ast Ast Ast
-        | While Ast Ast
+        | Either Ast Ast
+        | Prrr String Ast
         | ArgsLambda ([String], Ast)
         | Builtin ([Ast] -> Env -> Either String Ast)
         | Call [Ast]
+        | Case Ast [(Ast, Ast)]
         | Empty
-        deriving (Show)
-
+        deriving Show
     
     --type Env =  String (Ast)
     type Env =  [(String ,Ast)]

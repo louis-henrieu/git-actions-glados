@@ -9,7 +9,7 @@ import Info
 import Parser
 import System.Exit
 import System.IO (isEOF)
-import Bytecode
+import CptAst
 
 printAst :: Ast -> IO ()
 printAst ast = case ast of
@@ -25,23 +25,32 @@ printAst ast = case ast of
 
 someFuncGetLine :: Env -> IO()
 someFuncGetLine env = do
-    endF <- isEOF
-    if endF
+    end <- isEOF
+    if end
         then return ()
     else do
         line <- getLine
-        -- putStrLn (show (runParser (parseCpt) line))
-        case runParser (parseCpt) line of
-                Right (cpt, _) -> case cptToAst cpt of
-                    Right ast -> case preEvalAst ast env of
-                        Right ast_s -> case evalAst ast_s env of
-                            Right result -> case (fst result) of
-                                Empty -> someFuncGetLine (snd result)
-                                _ -> printAst (fst result) >> someFuncGetLine (snd result)
-                            Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
-                        Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
-                    Left err -> putStrLn ("Error : " ++ err) >> someFuncGetLine env
-                Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
+        case (runParser (parseMany (parseAndWith (,) parseCpt parseWhiteSpace))) line of
+            Right (as, s') -> case runParser parseCpt s' of
+                Right (a, s'') -> putStrLn "Hello"
+                -- Left x -> error (show as)
+                Left (x) -> case s' == "" of
+                    True -> case cptToAstList (map fst as) of
+                        Right ast -> putStrLn (show ast)
+                        Left x -> putStrLn ("Oh mon dieu, quelle erreur : " ++ x) >> exitWith (ExitFailure 84)
+                    False -> putStrLn ("Oh mon dieu, quelle erreur : " ++ x ) >> exitWith (ExitFailure 84)
+            Left x -> putStrLn ("Oh mon dieu, quelle erreur : " ++ x ) >> exitWith (ExitFailure 84)
+        -- case runParser (parseCpt) line of
+        --         Right (cpt, _) -> case cptToAst cpt of
+        --             Right ast -> case preEvalAst ast env of
+        --                 Right ast_s -> case evalAst ast_s env of
+        --                     Right result -> case (fst result) of
+        --                         Empty -> someFuncGetLine (snd result)
+        --                         _ -> printAst (fst result) >> someFuncGetLine (snd result)
+        --                     Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
+        --                 Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
+        --             Left err -> putStrLn ("Error : " ++ err) >> someFuncGetLine env
+        --         Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
 
 printByteCode :: [String] -> IO()
 printByteCode [] = return ()
