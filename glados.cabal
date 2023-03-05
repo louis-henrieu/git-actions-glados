@@ -3,8 +3,6 @@ cabal-version: 1.12
 -- This file has been generated from package.yaml by hpack version 0.35.1.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: d6111a452c737d3820f1ff08484479da917deda27851eb0495dd044437e5ebf8
 
 name:           glados
 version:        0.1.0.0
@@ -33,6 +31,8 @@ library
       ByteWriter.CoWriter
       ByteWriter.ObjectWriter
       ByteWriter.Writer
+      Compiler.ByteCode
+      Compiler.ByteCodeLib
       Compiler.SymboleResolution
       Cpt
       CptAst
@@ -80,11 +80,15 @@ test-suite glados-test
   other-modules:
       Tast
       Tbasicfunc
+      Tbytecode
       Tcpt
       Tdefine
       Tenv
       Tinfo
       Tkeywords
+      Tlib
+      Tparser
+      Tstack
       Paths_glados
   hs-source-dirs:
       test

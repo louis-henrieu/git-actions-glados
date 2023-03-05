@@ -65,15 +65,32 @@ someFuncFile _ [] stack = case (end stack) of
     -- False -> error (show (bytecode stack))
     False -> printByteCode ((init (bytecode stack)) ++ ["\t" ++ (show (dualNum stack)) ++ "\tLOAD_CONST 0\t\t(None)", "\t" ++ (show (dualNum stack + 2)) ++ "\tRETURN_VALUE"]) >> exitWith ExitSuccess
 someFuncFile env (x:xs) stack = do
-    case runParser (parseCpt) x of
-        Right (cpt, _) -> case preEvalAst ast env of
-                Right ast_s -> case evalAst ast_s env of
-                    Right result -> case (fst result) of
-                        Empty -> someFuncFile (snd result) xs (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
-                        _ -> case (end (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))) of
-                            True -> someFuncFile (snd result) [] (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
-                            False -> someFuncFile (snd result) xs (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
-                    Left err -> putStrLn("Error 1 : " ++ err) >> someFuncFile env xs (createByteCode ast env (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
-                Left err -> putStrLn("Error 2 : " ++ err) >> exitWith (ExitFailure 84)
-            Left err -> putStrLn ("Error 3 : " ++ err) >> someFuncFile env xs (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 })
-        Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)
+        case (runParser (parseMany (parseAndWith (,) parseCpt parseWhiteSpace))) x of
+            Right (as, s') -> case runParser parseCpt s' of
+                Right (a, s'') -> putStrLn "Hello"
+                -- Left x -> error (show as)
+                Left (x) -> case s' == "" of
+                    True -> case cptToAstList (map fst as) of
+                        Right ast -> case preEvalAst ast env of
+                            Right ast_s -> case evalAst ast_s env of
+                                Right result -> case (fst result) of
+                                    Empty -> someFuncFile (snd result) xs (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
+                                    _ -> case (end (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))) of
+                                        True -> someFuncFile (snd result) [] (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
+                                        False -> someFuncFile (snd result) xs (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
+                                Left err -> putStrLn("Error 1 : " ++ err) >> someFuncFile env xs (createByteCode ast env (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
+                            Left err -> putStrLn("Error 2 : " ++ err) >> exitWith (ExitFailure 84)
+                        Left x -> putStrLn ("Oh mon dieu, quelle erreur 3: " ++ x) >> exitWith (ExitFailure 84)
+                    False -> putStrLn ("Oh mon dieu, quelle erreur 5: " ++ (show s') ) >> exitWith (ExitFailure 84)
+            Left x -> putStrLn ("Oh mon dieu, quelle erreur 7: " ++ x ) >> exitWith (ExitFailure 84)
+        -- Right (cpt, _) -> case preEvalAst ast env of
+        --         Right ast_s -> case evalAst ast_s env of
+        --             Right result -> case (fst result) of
+        --                 Empty -> someFuncFile (snd result) xs (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
+        --                 _ -> case (end (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))) of
+        --                     True -> someFuncFile (snd result) [] (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
+        --                     False -> someFuncFile (snd result) xs (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
+        --             Left err -> putStrLn("Error 1 : " ++ err) >> someFuncFile env xs (createByteCode ast env (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))
+        --         Left err -> putStrLn("Error 2 : " ++ err) >> exitWith (ExitFailure 84)
+        --     Left err -> putStrLn ("Error 3 : " ++ err) >> someFuncFile env xs (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 })
+        -- Left err -> putStrLn("Error : " ++ err) >> exitWith (ExitFailure 84)

@@ -74,6 +74,7 @@ module CptAst (
             Left s -> Left s
             Right ast -> Right (Prrr s (Call ast))
         _ -> Left "Holala 1 ! There is a problem with the number of arguments in the Prrr statement"
+    specialCaseVerify ( x : xs ) = Right (Call (map cptToAst (x : xs))) 
 
     cptToAstList :: [Cpt] -> Either String Ast
     cptToAstList [] = Left "Holala ! Can't parse an empty list"

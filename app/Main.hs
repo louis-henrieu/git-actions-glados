@@ -19,6 +19,7 @@ parseFile (x:xs) parenthesis line file = case x of
     '\n' -> case parenthesis of
         0 -> parseFile xs 0 [] (file ++ [line])
         _ -> parseFile xs parenthesis (line ++ [' ']) file
+    '\r' -> parseFile xs parenthesis line file
     _ -> parseFile xs parenthesis (line ++ [x]) file
 parseFile w x y z = error("w : " ++ show w ++ "\nx : " ++ show x ++ "\ny : " ++ show y ++ "\nz : " ++ show z)
 
