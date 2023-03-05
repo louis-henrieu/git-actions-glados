@@ -10,6 +10,7 @@ import Parser
 import System.Exit
 import System.IO (isEOF)
 import CptAst
+import Bytecode
 
 printAst :: Ast -> IO ()
 printAst ast = case ast of
@@ -65,8 +66,7 @@ someFuncFile _ [] stack = case (end stack) of
     False -> printByteCode ((init (bytecode stack)) ++ ["\t" ++ (show (dualNum stack)) ++ "\tLOAD_CONST 0\t\t(None)", "\t" ++ (show (dualNum stack + 2)) ++ "\tRETURN_VALUE"]) >> exitWith ExitSuccess
 someFuncFile env (x:xs) stack = do
     case runParser (parseCpt) x of
-        Right (cpt, _) -> case cptToAst cpt of
-            Right ast -> case preEvalAst ast env of
+        Right (cpt, _) -> case preEvalAst ast env of
                 Right ast_s -> case evalAst ast_s env of
                     Right result -> case (fst result) of
                         Empty -> someFuncFile (snd result) xs (createByteCode ast (snd result) (stack { bytecode = bytecode stack ++ [(show (codeLine stack)) ++ " "], codeLine = (codeLine stack) + 1 }))

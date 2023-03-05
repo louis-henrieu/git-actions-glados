@@ -1,6 +1,7 @@
 module Info (
     Ast(..),
     Env,
+    Stack(..),
     getValueEnv,
     checkIfEmpty,
     eraseDoubles
@@ -23,6 +24,7 @@ module Info (
         | Builtin ([Ast] -> Env -> Either String Ast)
         | Call [Ast]
         | Case Ast [(Ast, Ast)]
+        | While Ast Ast
         | Empty
         deriving Show
     
