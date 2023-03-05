@@ -53,7 +53,7 @@ someFuncFile :: Env -> [String] -> Stack -> IO()
 someFuncFile _ [] stack = case (end stack) of
     True ->  printByteCode (init (bytecode stack))
     -- False -> error (show (bytecode stack))
-    False -> printByteCode ((init (bytecode stack)) ++ ["\t" ++ (show (dualNum stack)) ++ " LOAD_CONST 0\t\t(None)", "\t" ++ (show (dualNum stack + 2)) ++ " RETURN_VALUE"]) >> exitWith ExitSuccess
+    False -> printByteCode ((init (bytecode stack)) ++ ["\t" ++ (show (dualNum stack)) ++ "\tLOAD_CONST 0\t\t(None)", "\t" ++ (show (dualNum stack + 2)) ++ "\tRETURN_VALUE"]) >> exitWith ExitSuccess
 someFuncFile env (x:xs) stack = do
     case runParser (parseCpt) x of
         Right (cpt, _) -> case cptToAst cpt of
