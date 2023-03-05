@@ -172,7 +172,7 @@ module Ast (
     evalAst (ArgsLambda _) env = Right(SymbolAst "#<procedure>", env)
     evalAst (Call ((Lambda x y) : z)) env = lambdaFunc x y z env
     evalAst (Call (Builtin x : args)) env = case x args env of
-        Left err -> error (show err)
+        Left err -> Left err
         Right res -> Right (res, env)
     evalAst (Call (ArgsLambda (x, y) : z)) env = lambdaFunc x y z env
     evalAst (Builtin _) env = Right (SymbolAst"#<procedure>", env)

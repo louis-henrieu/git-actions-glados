@@ -24,6 +24,8 @@ dependencies:
 - split >=0.2
 - bytestring >= 0.11
 - containers >=0.6
+- data-binary-ieee754 ==0.4.4
+- binary ==0.8.9.0
 #- blip ==0.2.1
 
 ghc-options:
@@ -53,6 +55,8 @@ executables:
     - split
     - containers
     - bytestring
+    - binary
+    - data-binary-ieee754
     #- blip
 
 tests:

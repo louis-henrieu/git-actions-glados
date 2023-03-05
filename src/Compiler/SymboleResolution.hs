@@ -20,7 +20,7 @@ safeUpdateEnv symbol ast curr_env = case curr_env of -- (symbol, ast) : curr_env
 resolution :: [Ast] -> Env -> Env
 resolution l curr_env = case l of
     [] -> curr_env
-    (Define s a):n_l -> resolution n_l (safeUpdateEnv s a curr_env)
+    (Define s a) : n_l -> resolution n_l (safeUpdateEnv s a curr_env)
 
 -- | replaceSymbol :: [Ast] -> Env -> Either String [Ast]
 --
