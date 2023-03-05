@@ -1,11 +1,14 @@
 module ByteWriter.Writer where
 
-import Data.ByteString as B
+import Data.ByteString.Lazy as B
+import Data.ByteString.Char8 as C
 import Data.Word as W
 
 import Data.List.Split
 import Data.Char
 import Data.Map
+
+import ByteWriter.CoWriter
 
 opcodeList :: Map String Word8
 opcodeList = Data.Map.fromList [
@@ -116,11 +119,20 @@ opcodeList = Data.Map.fromList [
 
 
 
-getWord8HeaderPython38 :: [W.Word8]
-getWord8HeaderPython38 = [85, 13, 13, 10]
+getWord8MagicNumPython38 :: [W.Word8]
+getWord8MagicNumPython38 = [85, 13, 13, 10]
 
-getHeaderPython38 :: ByteString
-getHeaderPython38 = B.pack [85, 13, 13, 10]
+getWord8BitField :: [W.Word8]
+getWord8BitField = [0, 0, 0, 0]
+
+-- getWord8FileSize :: [W.Word8]
+-- getWord8FileSize = []
+
+getWord8FakeTimeStamp :: [W.Word8]
+getWord8FakeTimeStamp = [98,56,5,14]
+
+getMagicNumPython38 :: B.ByteString
+getMagicNumPython38 = B.pack [85, 13, 13, 10]
 
 appendListToList :: [a] -> [a] -> [a]
 appendListToList a b = case a of
@@ -147,15 +159,18 @@ buildByteList bytelist = case bytelist of
 
 -- ================================================================ --
 
--- | writeHeader String -> IO ()
+-- | writeMagicNum String -> IO ()
 -- String -> Filepath
 -- 
--- Writes the Header for Python3.8
+-- Writes the MagicNum for Python3.8
 --
-writeHeader :: String -> IO ()
-writeHeader filePath = B.writeFile filePath (getHeaderPython38)
+writeMagicNum :: String -> IO ()
+writeMagicNum filePath = B.writeFile filePath (getMagicNumPython38)
 
--- | writeHeader String -> [Word8] -> IO ()
+--writeHeader :: String -> IO ()
+--writeHeader file = B.writeFile file (B.pack (getWord8MagicNumPython38 ++ ))
+
+-- | writeMagicNum String -> [Word8] -> IO ()
 -- String -> Filepath
 -- [Word8] -> list of instruction as Byte
 --
@@ -164,6 +179,8 @@ writeHeader filePath = B.writeFile filePath (getHeaderPython38)
 appendByteList :: String -> [Word8] -> IO ()
 appendByteList file byteList = B.appendFile file (B.pack byteList)
 
+-- ========================================================= --
+
 -- | writeAllBytes String -> [String] -> IO ()
 -- String -> file path
 -- [String] -> instruction list
@@ -171,4 +188,6 @@ appendByteList file byteList = B.appendFile file (B.pack byteList)
 -- Write every Bytes needed at once
 --
 writeAllBytes :: String -> [String] -> IO ()
-writeAllBytes file instructionList = B.writeFile file (B.pack (getWord8HeaderPython38 ++ (buildByteList instructionList)))
+writeAllBytes file instructionList = B.writeFile file (B.pack (getWord8MagicNumPython38 ++ getWord8BitField ++ getWord8FakeTimeStamp ++ (co_argcount 2) ++ co_nlocals ++ co_stacksize ++ (buildByteList instructionList) ++ (co_consts []) ++ (co_names []) ++ (co_varnames []) ))
+
+-- Code Object begins with 99 and ends with 46

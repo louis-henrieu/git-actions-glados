@@ -6,6 +6,15 @@ import dis
 
 byte_list = []
 
+def fun():
+    with open(sys.argv[1], "rb") as f:
+        while (byte := f.read(1)):
+            byte_list.append(byte)
+            # Do stuff with byte.
+    for x in byte_list:
+        print(x, end=";")
+    print()
+
 def main():
     if len(sys.argv) == 2:
         d = open(sys.argv[1], "rb")
@@ -14,6 +23,7 @@ def main():
         if all.startswith(header):
             print ("GOOD FORMAT")
             print (all)
+            fun()
         else:
             print ("BAD FORMAT: was waiting for")
             print (IL.util.MAGIC_NUMBER)
