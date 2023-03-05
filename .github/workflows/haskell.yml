@@ -37,7 +37,7 @@ jobs:
     - name: Install apt
       run: sudo apt-get update --fix-missing
     - name: Install stack
-      run: sudo curl -sSL https://get.haskellstack.org/ | sh
+      run: sudo apt-get install haskell-platform -y
     - name: Install dependencies
       run: stack update
     - name: Build
