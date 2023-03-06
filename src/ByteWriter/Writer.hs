@@ -1,7 +1,7 @@
 module ByteWriter.Writer where
 
 import Data.ByteString.Lazy as B
-import Data.ByteString.Char8 as C
+import Data.ByteString.Char8
 import Data.Word as W
 
 import Data.List.Split
@@ -188,6 +188,4 @@ appendByteList file byteList = B.appendFile file (B.pack byteList)
 -- Write every Bytes needed at once
 --
 writeAllBytes :: String -> [String] -> IO ()
-writeAllBytes file instructionList = B.writeFile file (B.pack (getWord8MagicNumPython38 ++ getWord8BitField ++ getWord8FakeTimeStamp ++ (co_argcount 2) ++ co_nlocals ++ co_stacksize ++ (buildByteList instructionList) ++ (co_consts []) ++ (co_names []) ++ (co_varnames []) ))
-
--- Code Object begins with 99 and ends with 46
+writeAllBytes file instructionList = B.writeFile file (B.pack (getWord8MagicNumPython38 ++ getWord8FakeTimeStamp ++ (co_argcount 0) ++ co_kwonlyargcount ++ co_nlocals ++ co_stacksize ++ co_flags ++ (buildByteList instructionList) ++ (co_consts []) ++ (co_names []) ++ (co_varnames []) ++ (co_filename "") ++ (co_name "") ++ (co_firstlineno 0) ++ (co_lnotab []) ++ [0, 0, 0, 0] ))

@@ -1,0 +1,1 @@
+sup a b -> [if [> a b] #t #f]

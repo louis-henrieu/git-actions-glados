@@ -18,3 +18,4 @@ printTree x = case x of
     (Number i) -> "a Number '" ++ show i ++ "'"
     (NumberFloat f) -> "a Number '" ++ show f ++ "'"
     (List l) -> "a List with " ++ unwords (map printTree l) ++ ""
+    (Separator _) -> "a Separator"

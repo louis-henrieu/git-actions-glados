@@ -1,22 +1,16 @@
 module ByteWriter.ConvertTypeBS (
     convertInt,
-    convertInt4Bytes
+    convertInt4Bytes,
+    convertFloat
 ) where
 
-import Data.Bits
-import Data.Binary.IEEE754 as DBI
-import Data.Binary as BIN
 import Data.Word as W
 import Data.ByteString.Lazy as B
-import Data.ByteString.Lazy.Char8 as C
-import Data.Char (ord)
 import qualified Data.ByteString.Builder as BUI
 --import qualified Data.ByteString.Lazy as BL
 
 --import Conversion
 
-getEnd :: Word8
-getEnd = 0
 
 --convertFloatIEEE754 :: Float -> W.Word32
 --convertFloatIEEE754 x = DBI.floatToWord x

@@ -79,9 +79,9 @@ module Ast (
                 Left err -> Left ("Error in builtin function " ++ x ++ " : " ++ err ++ "! ++ env \n\n\n : " ++ show(env))
                 Right ast -> Right (ast, env)
             _ -> Left (x ++ " is not a function")
-    evalAst (Lambda _ _) env = Right(SymbolAst "#<procedure>", env)
+    evalAst (Lambda (x : xs) y) env = defineFunc x (Lambda (xs) y) env
     evalAst (ArgsLambda _) env = Right(SymbolAst "#<procedure>", env)
-    evalAst (Call ((Lambda x y) : z)) env = lambdaFunc x y z env
+    evalAst (Call ((Lambda (x : xs) y) : z)) env = defineFunc x (Lambda xs y) env
     evalAst (Call (Builtin x : args)) env = case x args env of
         Left err -> error (show err)
         Right res -> Right (res, env)

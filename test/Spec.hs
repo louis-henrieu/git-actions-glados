@@ -7,6 +7,7 @@ import Test.Hspec (hspec)
 import Tast
 import Tbasicfunc
 import Tcpt
+import Tcptast
 import Tdefine
 import Tenv
 import Tinfo
@@ -17,6 +18,7 @@ main = hspec $ do
     testAst
     testBasicFunc
     testCpt
+    testCptAst
     testDefine
     testEnv
     testInfo

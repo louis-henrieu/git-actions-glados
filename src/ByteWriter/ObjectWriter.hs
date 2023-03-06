@@ -1,4 +1,7 @@
-module ByteWriter.ObjectWriter where
+module ByteWriter.ObjectWriter (
+    createIntObj,
+    createFloatObj
+) where
 
 import ByteWriter.ConvertTypeBS
 import Data.Word
@@ -38,7 +41,7 @@ import Data.Word
 -- 4 -> number of abs value byte alowed to the integer
 --
 createIntObj :: Int -> [Word8]
-createIntObj x = 105:4:(convertInt x)
+createIntObj x = 105:(convertInt4Bytes x)
 
---createFloatObj :: Float -> [Word8]
---createFloatObj x = 102:4:
+createFloatObj :: Float -> [Word8]
+createFloatObj x = 102:(convertFloat x)

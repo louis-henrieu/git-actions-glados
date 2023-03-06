@@ -10,9 +10,7 @@ import Control.Applicative
 
 import Cpt
 
-data Parser a = Parser
-  { runParser :: String -> Either String (a, String)
-  }
+data Parser a = Parser {runParser :: String -> Either String (a, String)}
 
 instance Functor Parser where
   fmap fct parser =
@@ -168,7 +166,7 @@ parseString = parseSome (parseAnyChar ['a' .. 'z'] <|>  parseAnyChar ['A' .. 'Z'
 parseSeparator :: Parser String
 parseSeparator = 
   Parser (
-    \s -> case runParser (parseChar '=') s of
+    \s -> case runParser (parseChar '-') s of
       Right (_, s') -> case runParser (parseChar '>') s' of
         Right (_, s'') -> Right ("=>", s'')
         Left (_) -> Left ("Error ParseSeparator")

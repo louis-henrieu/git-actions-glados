@@ -11,11 +11,8 @@ def call(x):
     return add(x, 5) + sub(x, 5)
 
 def z(x, y):
-    x = 3
-    if 5 == x:
-        y
-    else:
-        5 - 5
+    z = 5.6
+    round (z)
 
 if __name__ == "__main__":
     dis.dis(z)

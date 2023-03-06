@@ -1,2 +1,3 @@
-a => 5
-a 4 5
+calc x y -> [+ x y]
+a -> 5.6
+round a
