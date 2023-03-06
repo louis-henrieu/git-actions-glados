@@ -3,7 +3,6 @@ module Ast (
     preEvalAst,
     evalAst
 ) where
-    import Cpt
     import Info
     import Env
     import Define
@@ -76,7 +75,7 @@ module Ast (
         Right res -> case res of
             ArgsLambda (f_x, y) -> lambdaFunc f_x y xs env
             Builtin f -> case f (convertArgs xs env) env of
-                Left err -> Left ("Error in builtin function " ++ x ++ " : " ++ err ++ "! ++ env \n\n\n : " ++ show(env))
+                Left err -> Left ("Error in builtin function " ++ x ++ " : " ++ err ++ "!")
                 Right ast -> Right (ast, env)
             _ -> Left (x ++ " is not a function")
     evalAst (Lambda (x : xs) y) env = defineFunc x (Lambda (xs) y) env

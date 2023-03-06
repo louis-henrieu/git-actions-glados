@@ -1,7 +1,7 @@
 1 	0	LOAD_CONST 0		(5)
 	2	STORE_FAST 0		(x)
 
-2 	4	LOAD_FAST 0	(x)
+2 	4	LOAD_FAST 0		(x)
 	4	LOAD_CONST 1		(4)
 	6	BINARY_ADD
 	8	STORE_FAST 1		(y)

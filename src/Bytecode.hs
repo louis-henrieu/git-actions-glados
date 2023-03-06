@@ -45,7 +45,7 @@ module Bytecode (
 
     loadFast :: Stack -> String -> Maybe Stack
     loadFast stack name = case getIndexListI name (fast stack) 0 of
-        Just i -> Just (addByteCode stack ["\t" ++ (show (dualNum stack)) ++ "\tLOAD_FAST " ++ (show i) ++ "\t(" ++ name ++ ")"])
+        Just i -> Just (addByteCode stack ["\t" ++ (show (dualNum stack)) ++ "\tLOAD_FAST " ++ (show i) ++ "\t\t(" ++ name ++ ")"])
         Nothing -> Just (addByteCode (stack { fast = fast stack ++ [name], dualNum = dualNum stack + 2})  ["\t" ++ (show (dualNum stack)) ++ "\tSTORE_FAST " ++ (show (length (fast stack))) ++ "\t\t(" ++ name ++ ")"])
 
     displayToken :: Ast -> String
@@ -236,6 +236,13 @@ module Bytecode (
         SymbolAst sym -> case evalTrueCond (SymbolAst sym) env stack of
             Just newStack -> newStack
             Nothing -> error "Should not be happening"
+        Call (SymbolAst x : xs ) -> case callByteCode (Call (SymbolAst x : xs )) env stack of
+            Just newStack -> case getToken x of
+                Just s -> addByteCode (newStack {dualNum = dualNum newStack + 4}) ["\t" ++ (show (dualNum newStack)) ++ "\t" ++ s, "\t" ++ (show (dualNum newStack + 2)) ++ "\tPOP_JUMP_IF_FALSE " ++ (show (dualNum newStack + 4))]
+                Nothing -> case evalTrueCond insider env newStack of
+                    Just newStack2 -> addByteCode (newStack2 {dualNum = dualNum newStack2 + 2}) ["\t" ++ (show (dualNum newStack2)) ++ "\tJUMP_ABSOLUTE " ++ (show (dualNum newStack2 + 2))]
+                    Nothing -> error "Should not be happening"
+            Nothing -> error "Should not be happening"
         _ -> case (evalTrueCond insider env stack) of
             Nothing -> error "Should not be happening"
             Just newStack -> addByteCode (newStack {dualNum = dualNum newStack + 2}) ["\t" ++ (show (dualNum newStack)) ++ "\tJUMP_ABSOLUTE\t" ++ (show (dualNum newStack))]
@@ -275,5 +282,6 @@ module Bytecode (
                     Nothing -> error "Should not happening"
     createByteCode (If cond true false) env stack = ifByteCode (If cond true false) env stack
     createByteCode (Lambda (x : xs) ast) env stack = addByteCode (stack {dualNum = dualNum stack + 2, global = global stack ++ [x]}) ["\t" ++ (show (dualNum stack)) ++ "\tSTORE_GLOBAL " ++ (show (length (global stack))) ++ "\t\t(" ++ x ++ ")"]
+    createByteCode (While cond ast) env stack = whileByteCode (While cond ast) env stack
     createByteCode ast env stack = error (show ast)
     -- createByteCode _ _ stack = addByteCode (stack { dualNum = dualNum stack + 4, end = True } ) ["\t" ++ (show (dualNum stack)) ++ " LOAD_CONST 0\t\t(None)", "\t" ++ (show (dualNum stack + 2)) ++ " RETURN_VALUE"]

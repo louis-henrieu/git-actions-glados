@@ -77,6 +77,9 @@ module CptAst (
     specialCaseVerify (Symbol "Siii" : x : y : z : xs ) = case length xs of
         0 -> Right (If (cptToAst x) (cptToAst y) (cptToAst z))
         _ -> Left "Holala 2 ! There is a problem with the number of arguments in the Siii statement"
+    specialCaseVerify (Symbol "Tantque" : x : y : xs) = case length xs of
+        0 -> Right (While (cptToAst x) (cptToAst y))
+        _ -> Left "Holala 4 ! There is a problem with the number of arguments in the Tantque statement"
     specialCaseVerify ( x : xs ) = Right (Call (map cptToAst (x : xs)))
 
     cptToAstList :: [Cpt] -> Either String Ast

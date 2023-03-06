@@ -65,5 +65,5 @@ test_result "test/yuyu_exemple/func1.yuyu" "test/yuyu_solution/func1.txt" 0 "\t-
 test_result "test/yuyu_exemple/func2.yuyu" "test/yuyu_solution/func2.txt" 0 "\t-Addition without creation of function-\t\t\t\t"
 test_result "test/yuyu_exemple/func3.yuyu" "test/yuyu_solution/func3.txt" 0 "\t-Call of an addition without arguments-\t\t\t\t"
 test_result "test/yuyu_exemple/func4.yuyu" "test/yuyu_solution/func4.txt" 0 "\t-Call of an addition without arguments but float and int-\t"
-test_result "test/yuyu_exemple/func5.yuyu" "test/yuyu_solution/func5.txt" 0 "\t-Call switch-\t\t"
-test_result "test/yuyu_exemple/func6.yuyu" "test/yuyu_solution/func6.txt" 0 "\t-Call of an addition with one argument-\t"
+test_result "test/yuyu_exemple/func5.yuyu" "test/yuyu_solution/func5.txt" 0 "\t-Call switch-\t\t\t\t\t\t\t"
+test_result "test/yuyu_exemple/func6.yuyu" "test/yuyu_solution/func6.txt" 0 "\t-Call of an addition with one argument-\t\t\t\t"
